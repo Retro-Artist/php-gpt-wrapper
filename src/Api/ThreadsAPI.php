@@ -1,9 +1,10 @@
 <?php
-// src/Api/ThreadsAPI.php
+// src/Api/ThreadsAPI.php - UPDATED for consistent SystemAPI usage
 
 require_once __DIR__ . '/../Core/Helpers.php';
 require_once __DIR__ . '/../Web/Models/Thread.php';
 require_once __DIR__ . '/../Web/Models/Agent.php';
+require_once __DIR__ . '/../Api/SystemAPI.php';
 
 class ThreadsAPI {
     
@@ -127,13 +128,13 @@ class ThreadsAPI {
             
             $userMessage = trim($input['message']);
             
-            // Save user message
+            // Save user message to thread
             Thread::addMessage($threadId, 'user', $userMessage);
             
             // Get conversation history for context
             $messages = Thread::getMessages($threadId);
             
-            // Prepare messages for OpenAI (exclude system messages from history)
+            // Prepare conversation history for OpenAI (exclude system messages)
             $conversationHistory = [];
             foreach ($messages as $msg) {
                 if ($msg['role'] !== 'system') {
@@ -144,22 +145,11 @@ class ThreadsAPI {
                 }
             }
             
-            // Check if an agent should handle this (if specified in input)
-            if (isset($input['agentId']) && $input['agentId']) {
-                $agent = Agent::findById($input['agentId']);
-                if ($agent && $agent->getUserId() == Helpers::getCurrentUserId()) {
-                    $aiResponse = $agent->execute($userMessage, $threadId);
-                } else {
-                    Helpers::jsonError('Agent not found or access denied', 404);
-                }
-            } else {
-                // Use default OpenAI chat
-                require_once __DIR__ . '/../Api/SystemAPI.php';
-                $systemAPI = new SystemAPI();
-                $aiResponse = $systemAPI->callOpenAI($userMessage, $conversationHistory);
-            }
+            // Use SystemAPI for OpenAI communication
+            $systemAPI = new SystemAPI();
+            $aiResponse = $systemAPI->simpleChat($userMessage, $conversationHistory);
             
-            // Save AI response
+            // Save AI response to thread
             Thread::addMessage($threadId, 'assistant', $aiResponse);
             
             Helpers::jsonResponse([

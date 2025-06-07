@@ -1,5 +1,5 @@
 <?php
-// src/Api/SystemAPI.php
+// src/Api/SystemAPI.php - REFACTORED for single responsibility
 
 require_once __DIR__ . '/../Core/Helpers.php';
 
@@ -10,7 +10,6 @@ class SystemAPI {
     private $temperature;
     
     public function __construct() {
-        // Load configuration properly
         $this->loadConfig();
         
         if (empty($this->apiKey)) {
@@ -19,35 +18,159 @@ class SystemAPI {
     }
     
     private function loadConfig() {
-        // Try multiple ways to get the config in order of preference
-        
-        // 1. Try environment variables first (most reliable)
+        // Environment variables first
         $this->apiKey = getenv('OPENAI_API_KEY') ?: '';
         $this->model = getenv('OPENAI_MODEL') ?: 'gpt-4o-mini';
         $this->maxTokens = (int)(getenv('OPENAI_MAX_TOKENS') ?: 1024);
         $this->temperature = (float)(getenv('OPENAI_TEMPERATURE') ?: 0.7);
         
-        // 2. If environment variables are empty, try config file
+        // Fallback to config file if needed
         if (empty($this->apiKey)) {
             try {
                 if (file_exists(__DIR__ . '/../../config/config.php')) {
                     $config = require __DIR__ . '/../../config/config.php';
-                    $this->apiKey = $config['api_key'] ?? '';
-                    $this->model = $config['model'] ?? $this->model;
-                    $this->maxTokens = $config['max_tokens'] ?? $this->maxTokens;
-                    $this->temperature = $config['temperature'] ?? $this->temperature;
+                    $this->apiKey = $config['openai']['api_key'] ?? '';
+                    $this->model = $config['openai']['model'] ?? $this->model;
+                    $this->maxTokens = $config['openai']['max_tokens'] ?? $this->maxTokens;
+                    $this->temperature = $config['openai']['temperature'] ?? $this->temperature;
                 }
             } catch (Exception $e) {
                 error_log("Config file loading error: " . $e->getMessage());
             }
         }
+    }
+    
+    /**
+     * SINGLE METHOD FOR ALL OPENAI CALLS
+     * This is the only method that should talk to OpenAI
+     */
+    public function callOpenAI($payload) {
+        // Validate payload has required fields
+        if (!isset($payload['messages']) || !is_array($payload['messages'])) {
+            throw new Exception('Invalid payload: messages array required');
+        }
         
-        // 3. Final validation
-        if (empty($this->apiKey)) {
-            error_log("OpenAI API key not found in environment variables or config file");
+        // Set defaults while preserving custom values
+        $payload = array_merge([
+            'model' => $this->model,
+            'max_tokens' => $this->maxTokens,
+            'temperature' => $this->temperature,
+            'stream' => false
+        ], $payload);
+        
+        return $this->makeOpenAICall($payload);
+    }
+    
+    /**
+     * CONVENIENCE METHOD FOR SIMPLE CHAT
+     * Used by ThreadsAPI for basic conversations
+     */
+    public function simpleChat($userMessage, $conversationHistory = [], $systemMessage = null) {
+        // Build messages array
+        $messages = [];
+        
+        // Add system message if provided
+        if ($systemMessage) {
+            $messages[] = [
+                'role' => 'system',
+                'content' => $systemMessage
+            ];
+        } else {
+            $messages[] = [
+                'role' => 'system',
+                'content' => 'You are a helpful AI assistant. Provide clear, helpful, and concise responses.'
+            ];
+        }
+        
+        // Add conversation history (last 10 messages to keep it reasonable)
+        $recentHistory = array_slice($conversationHistory, -10);
+        foreach ($recentHistory as $msg) {
+            if ($msg['role'] !== 'system') {
+                $messages[] = [
+                    'role' => $msg['role'],
+                    'content' => $msg['content']
+                ];
+            }
+        }
+        
+        // Add current user message
+        $messages[] = [
+            'role' => 'user',
+            'content' => $userMessage
+        ];
+        
+        // Call OpenAI using the single method
+        $response = $this->callOpenAI(['messages' => $messages]);
+        
+        // Extract and return response content
+        if (isset($response['choices'][0]['message']['content'])) {
+            return trim($response['choices'][0]['message']['content']);
+        } else {
+            throw new Exception('Invalid response from OpenAI API');
         }
     }
     
+    /**
+     * CONVENIENCE METHOD FOR AGENT EXECUTION
+     * Used by Agent Model for tool-enabled conversations
+     */
+    public function agentChat($messages, $tools = null, $customModel = null, $customTemperature = null) {
+        $payload = [
+            'messages' => $messages,
+            'model' => $customModel ?: $this->model,
+            'temperature' => $customTemperature ?: $this->temperature,
+            'max_tokens' => $this->maxTokens
+        ];
+        
+        // Add tools if provided
+        if (!empty($tools)) {
+            $payload['tools'] = $tools;
+            $payload['tool_choice'] = 'auto';
+        }
+        
+        return $this->callOpenAI($payload);
+    }
+    
+    private function makeOpenAICall($payload) {
+        $ch = curl_init('https://api.openai.com/v1/chat/completions');
+        
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $this->apiKey
+        ]);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+        curl_close($ch);
+        
+        // Handle curl errors
+        if ($response === false) {
+            throw new Exception('cURL error: ' . $curlError);
+        }
+        
+        // Parse JSON response
+        $decoded = json_decode($response, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new Exception('JSON parse error: ' . json_last_error_msg());
+        }
+        
+        // Handle HTTP errors
+        if ($httpCode !== 200) {
+            $errorMessage = isset($decoded['error']['message']) 
+                ? $decoded['error']['message'] 
+                : "HTTP error: $httpCode";
+            throw new Exception("OpenAI API error: " . $errorMessage);
+        }
+        
+        return $decoded;
+    }
+    
+    // System status methods
     public function getStatus() {
         Helpers::requireAuth();
         
@@ -90,88 +213,6 @@ class SystemAPI {
         }
     }
     
-    /**
-     * Call OpenAI API for standard chat (used by ThreadsAPI)
-     */
-    public function callOpenAI($userMessage, $conversationHistory = []) {
-        // Prepare messages array for OpenAI
-        $messages = [
-            [
-                'role' => 'system',
-                'content' => 'You are a helpful AI assistant. Provide clear, helpful, and concise responses.'
-            ]
-        ];
-        
-        // Add conversation history (keeping it reasonable length)
-        $recentHistory = array_slice($conversationHistory, -10); // Last 10 messages
-        $messages = array_merge($messages, $recentHistory);
-        
-        // Prepare the API request
-        $payload = [
-            'model' => $this->model,
-            'messages' => $messages,
-            'max_tokens' => $this->maxTokens,
-            'temperature' => $this->temperature,
-            'stream' => false
-        ];
-        
-        // Make the API call
-                    $response = $this->makeOpenAICall($payload);
-        
-        // Extract and return the response
-        if (isset($response['choices'][0]['message']['content'])) {
-            return trim($response['choices'][0]['message']['content']);
-        } else {
-            throw new Exception('Invalid response from OpenAI API');
-        }
-    }
-    
-    /**
-     * Call OpenAI API for agent execution (public method)
-     */
-    public function callOpenAIAPI($payload) {
-        return $this->makeOpenAICall($payload);
-    }
-    
-    private function makeOpenAICall($payload) {
-        $ch = curl_init('https://api.openai.com/v1/chat/completions');
-        
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'Authorization: Bearer ' . $this->apiKey
-        ]);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-        
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $curlError = curl_error($ch);
-        curl_close($ch);
-        
-        // Handle curl errors
-        if ($response === false) {
-            throw new Exception('cURL error: ' . $curlError);
-        }
-        
-        // Parse JSON response
-        $decoded = json_decode($response, true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new Exception('JSON parse error: ' . json_last_error_msg());
-        }
-        
-        // Handle HTTP errors
-        if ($httpCode !== 200) {
-            $errorMessage = isset($decoded['error']['message']) 
-                ? $decoded['error']['message'] 
-                : "HTTP error: $httpCode";
-            throw new Exception("OpenAI API error: " . $errorMessage);
-        }
-        
-        return $decoded;
-    }
-    
     private function checkDatabaseStatus() {
         try {
             require_once __DIR__ . '/../Core/Database.php';
@@ -185,14 +226,12 @@ class SystemAPI {
     
     private function checkOpenAIStatus() {
         try {
-            // Simple API test
             $payload = [
-                'model' => $this->model,
                 'messages' => [['role' => 'user', 'content' => 'Test']],
                 'max_tokens' => 5
             ];
             
-            $response = $this->makeOpenAICall($payload);
+            $response = $this->callOpenAI($payload);
             return isset($response['choices']) ? 'connected' : 'error';
         } catch (Exception $e) {
             return 'error';

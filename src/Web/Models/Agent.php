@@ -1,8 +1,9 @@
 <?php
-// src/Web/Models/Agent.php
+// src/Web/Models/Agent.php - UPDATED for consistent SystemAPI usage
 
 require_once __DIR__ . '/../../Core/Database.php';
 require_once __DIR__ . '/../../Core/Helpers.php';
+require_once __DIR__ . '/../../Api/SystemAPI.php';
 
 class Agent {
     private $id;
@@ -100,22 +101,6 @@ class Agent {
         return $agents;
     }
     
-    public static function getAllActiveAgents() {
-        $db = Database::getInstance();
-        $results = $db->fetchAll("
-            SELECT * FROM agents 
-            WHERE is_active = true 
-            ORDER BY name ASC
-        ");
-        
-        $agents = [];
-        foreach ($results as $data) {
-            $agents[] = self::fromArray($data);
-        }
-        
-        return $agents;
-    }
-    
     private static function fromArray($data) {
         $agent = new self($data['name'], $data['instructions'], $data['model']);
         $agent->id = $data['id'];
@@ -125,6 +110,10 @@ class Agent {
         return $agent;
     }
     
+    /**
+     * EXECUTE AGENT WITH TOOLS
+     * This is where agents differ from simple chat - they can use tools
+     */
     public function execute($message, $threadId) {
         // Create a run for tracking
         $run = $this->createRun($threadId);
@@ -150,10 +139,10 @@ class Agent {
         require_once __DIR__ . '/Thread.php';
         $messages = Thread::getMessages($threadId);
         
-        // Prepare tools for OpenAI
+        // Prepare tools for OpenAI (if agent has tools)
         $tools = $this->prepareTools();
         
-        // Prepare messages for OpenAI
+        // Build messages array for OpenAI
         $conversationMessages = [
             [
                 'role' => 'system',
@@ -178,27 +167,17 @@ class Agent {
             'content' => $message
         ];
         
-        // Use SystemAPI for OpenAI calls (centralized approach)
-        require_once __DIR__ . '/../../Api/SystemAPI.php';
+        // Use SystemAPI for all OpenAI communication
         $systemAPI = new SystemAPI();
         
-        // Prepare OpenAI request payload
-        $payload = [
-            'model' => $this->model,
-            'messages' => $conversationMessages,
-            'max_tokens' => 1024,
-            'temperature' => 0.7
-        ];
-        
-        // Add tools if available
-        if (!empty($tools)) {
-            $payload['tools'] = $tools;
-            $payload['tool_choice'] = 'auto';
-        }
-        
         try {
-            // Make initial API call using SystemAPI
-            $response = $systemAPI->callOpenAIAPI($payload);
+            // Make initial API call
+            $response = $systemAPI->agentChat(
+                $conversationMessages, 
+                $tools, 
+                $this->model, 
+                0.7 // Use slightly higher temperature for agents
+            );
             
             // Validate response structure
             if (!isset($response['choices'][0]['message'])) {
@@ -208,6 +187,7 @@ class Agent {
             
             $assistantMessage = $response['choices'][0]['message'];
             
+            // Check if tools were called
             if (isset($assistantMessage['tool_calls']) && !empty($assistantMessage['tool_calls'])) {
                 error_log("Agent making " . count($assistantMessage['tool_calls']) . " tool calls");
                 
@@ -227,33 +207,20 @@ class Agent {
                 }
                 
                 // Make another API call with tool results
-                $payload['messages'] = $conversationMessages;
-                
                 try {
-                    $finalResponse = $systemAPI->callOpenAIAPI($payload);
+                    $finalResponse = $systemAPI->agentChat($conversationMessages, $tools, $this->model);
                     
-                    // Debug log the final response structure
-                    error_log("Final OpenAI response: " . json_encode($finalResponse));
-                    
-                    // More robust validation of final response
-                    if (!isset($finalResponse['choices']) || 
-                        !is_array($finalResponse['choices']) || 
-                        empty($finalResponse['choices']) ||
-                        !isset($finalResponse['choices'][0]['message'])) {
-                        
-                        error_log("Invalid final response structure from OpenAI");
-                        
-                        // Return a helpful message based on tool results
+                    // Validate final response
+                    if (!isset($finalResponse['choices'][0]['message']['content'])) {
+                        error_log("Invalid final response from OpenAI");
                         $toolSummary = $this->summarizeToolResults($toolResults);
                         return "I've executed the requested tools and got these results: " . $toolSummary;
                     }
                     
-                    $finalMessage = $finalResponse['choices'][0]['message'];
-                    $finalContent = $finalMessage['content'] ?? '';
+                    $finalContent = $finalResponse['choices'][0]['message']['content'];
                     
                     // Ensure content is not empty
                     if (empty(trim($finalContent))) {
-                        error_log("Final response content is empty");
                         $toolSummary = $this->summarizeToolResults($toolResults);
                         $finalContent = "I've completed your request using the available tools. " . $toolSummary;
                     }
@@ -262,8 +229,6 @@ class Agent {
                     
                 } catch (Exception $e) {
                     error_log("Error in final OpenAI call: " . $e->getMessage());
-                    
-                    // Fallback: provide summary of tool results
                     $toolSummary = $this->summarizeToolResults($toolResults);
                     return "I've executed your request using the available tools, but encountered an issue with the final response. Here's what I found: " . $toolSummary;
                 }
@@ -272,7 +237,6 @@ class Agent {
                 // No tools needed, return response directly
                 $content = $assistantMessage['content'] ?? '';
                 
-                // Ensure content is not empty
                 if (empty(trim($content))) {
                     $content = "I understand your request, but I wasn't able to generate a proper response.";
                 }
@@ -286,9 +250,6 @@ class Agent {
         }
     }
     
-    /**
-     * Create a summary of tool results for fallback responses
-     */
     private function summarizeToolResults($toolResults) {
         $summaries = [];
         
@@ -334,7 +295,6 @@ class Agent {
         
         foreach ($this->tools as $toolClassName) {
             try {
-                // Load the tool class
                 $toolFile = __DIR__ . "/../../Tools/{$toolClassName}.php";
                 
                 if (file_exists($toolFile)) {
