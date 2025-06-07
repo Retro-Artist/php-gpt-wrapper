@@ -292,7 +292,7 @@ Your OpenAI Webchat is now a **complete, production-ready system** with:
 
 1. Clone the repository and set up environment:
 ```bash
-git clone https://github.com/Retro-Artist/php83-docker-env.git
+git clone https://github.com/Retro-Artist/php-gpt-wrapper.git
 cd docker-template
 mv .env.example .env
 ```
