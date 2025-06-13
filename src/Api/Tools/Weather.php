@@ -1,7 +1,8 @@
 <?php
-// src/Tools/Weather.php
 
-require_once __DIR__ . '/Math.php'; // For Tool base class
+// src/Api/Tools/Weather.php - UPDATED with Tool base class
+
+require_once __DIR__ . '/../Models/Tool.php';
 
 class Weather extends Tool {
     

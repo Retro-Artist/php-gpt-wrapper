@@ -1,10 +1,10 @@
 <?php
-// src/Web/Controllers/DashboardController.php
+// src/Web/Controllers/DashboardController.php - UPDATED PATHS
 
 require_once __DIR__ . '/../../Core/Helpers.php';
-require_once __DIR__ . '/../Models/Thread.php';
-require_once __DIR__ . '/../Models/Agent.php';
-require_once __DIR__ . '/../Models/Run.php';
+require_once __DIR__ . '/../../Api/Models/Thread.php';
+require_once __DIR__ . '/../../Api/Models/Agent.php';
+require_once __DIR__ . '/../../Api/Models/Run.php';
 
 class DashboardController {
     

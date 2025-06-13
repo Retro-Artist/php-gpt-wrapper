@@ -1,10 +1,10 @@
 <?php
-// src/Api/ThreadsAPI.php - UPDATED for consistent SystemAPI usage
+// src/Api/OpenAI/ThreadsAPI.php - UPDATED PATHS
 
-require_once __DIR__ . '/../Core/Helpers.php';
-require_once __DIR__ . '/../Web/Models/Thread.php';
-require_once __DIR__ . '/../Web/Models/Agent.php';
-require_once __DIR__ . '/../Api/SystemAPI.php';
+require_once __DIR__ . '/../../Core/Helpers.php';
+require_once __DIR__ . '/../Models/Thread.php';
+require_once __DIR__ . '/../Models/Agent.php';
+require_once __DIR__ . '/SystemAPI.php';
 
 class ThreadsAPI {
     

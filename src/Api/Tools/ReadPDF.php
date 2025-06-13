@@ -1,7 +1,7 @@
 <?php
-// src/Tools/ReadPDF.php
+// src/Api/Tools/ReadPDF.php - UPDATED with Tool base class
 
-require_once __DIR__ . '/Math.php'; // For Tool base class
+require_once __DIR__ . '/../Models/Tool.php';
 
 class ReadPDF extends Tool {
     
@@ -94,44 +94,5 @@ class ReadPDF extends Tool {
                "- Content summarization\n" .
                "- Information extraction\n" .
                "- Research assistance";
-    }
-    
-    /**
-     * Real implementation using smalot/pdfparser would look like this:
-     */
-    private function realPDFExtraction($filePath, $pageRange) {
-        /*
-        // Require the PDF parser library
-        // composer require smalot/pdfparser
-        
-        use Smalot\PdfParser\Parser;
-        
-        $parser = new Parser();
-        $pdf = $parser->parseFile($filePath);
-        
-        $text = '';
-        $pages = $pdf->getPages();
-        
-        if ($pageRange === 'all') {
-            $text = $pdf->getText();
-        } else {
-            // Parse page range (e.g., "1-5" or "3")
-            if (strpos($pageRange, '-') !== false) {
-                list($start, $end) = explode('-', $pageRange);
-                $start = max(1, intval($start));
-                $end = min(count($pages), intval($end));
-            } else {
-                $start = $end = max(1, min(count($pages), intval($pageRange)));
-            }
-            
-            for ($i = $start - 1; $i < $end; $i++) {
-                if (isset($pages[$i])) {
-                    $text .= $pages[$i]->getText() . "\n";
-                }
-            }
-        }
-        
-        return trim($text);
-        */
     }
 }

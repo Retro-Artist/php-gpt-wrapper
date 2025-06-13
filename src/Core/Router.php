@@ -1,5 +1,5 @@
 <?php
-// src/Core/Router.php
+// src/Core/Router.php - Updated for new file structure
 
 class Router {
     private $routes = [];
@@ -72,9 +72,9 @@ class Router {
     private function callHandler($route) {
         list($handlerName, $methodName) = explode('@', $route['handler']);
         
-        // Determine handler directory based on route type
+        // Determine handler directory based on route type - UPDATED PATHS
         if ($route['type'] === 'api') {
-            $handlerFile = __DIR__ . "/../Api/{$handlerName}.php";
+            $handlerFile = __DIR__ . "/../Api/OpenAI/{$handlerName}.php";
         } else {
             $handlerFile = __DIR__ . "/../Web/Controllers/{$handlerName}.php";
         }
@@ -136,7 +136,7 @@ class Router {
             header('Content-Type: application/json');
             echo json_encode(['error' => 'Not found']);
         } else {
-            // Load 404 view
+            // Load 404 view - UPDATED PATH
             include __DIR__ . '/../Web/Views/error.php';
         }
         exit;

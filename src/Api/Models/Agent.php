@@ -1,9 +1,9 @@
 <?php
-// src/Web/Models/Agent.php - UPDATED for consistent SystemAPI usage
+// src/Api/Models/Agent.php - UPDATED PATHS
 
 require_once __DIR__ . '/../../Core/Database.php';
 require_once __DIR__ . '/../../Core/Helpers.php';
-require_once __DIR__ . '/../../Api/SystemAPI.php';
+require_once __DIR__ . '/../OpenAI/SystemAPI.php';
 
 class Agent {
     private $id;
@@ -135,7 +135,7 @@ class Agent {
     }
     
     private function executeWithTools($message, $threadId) {
-        // Get conversation history
+        // Get conversation history - UPDATED PATH
         require_once __DIR__ . '/Thread.php';
         $messages = Thread::getMessages($threadId);
         
@@ -295,7 +295,8 @@ class Agent {
         
         foreach ($this->tools as $toolClassName) {
             try {
-                $toolFile = __DIR__ . "/../../Tools/{$toolClassName}.php";
+                // UPDATED PATH
+                $toolFile = __DIR__ . "/../Tools/{$toolClassName}.php";
                 
                 if (file_exists($toolFile)) {
                     require_once $toolFile;
@@ -358,7 +359,8 @@ class Agent {
         }
         
         $toolClassName = $toolMap[$toolName];
-        $toolFile = __DIR__ . "/../../Tools/{$toolClassName}.php";
+        // UPDATED PATH
+        $toolFile = __DIR__ . "/../Tools/{$toolClassName}.php";
         
         if (!file_exists($toolFile)) {
             throw new Exception("Tool file not found: {$toolFile}");

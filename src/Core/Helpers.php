@@ -1,5 +1,5 @@
 <?php
-// src/Core/Helpers.php
+// src/Core/Helpers.php - UPDATED VIEW PATH
 
 class Helpers {
     
@@ -93,7 +93,7 @@ class Helpers {
     }
     
     /**
-     * Load a view with variables
+     * Load a view with variables - UPDATED PATH
      */
     public static function loadView($viewName, $variables = []) {
         // Extract variables for use in view

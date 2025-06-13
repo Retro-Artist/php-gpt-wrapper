@@ -1,9 +1,9 @@
 <?php
-// src/Api/AgentsAPI.php
+// src/Api/OpenAI/AgentsAPI.php - UPDATED PATHS
 
-require_once __DIR__ . '/../Core/Helpers.php';
-require_once __DIR__ . '/../Web/Models/Agent.php';
-require_once __DIR__ . '/../Web/Models/Thread.php';
+require_once __DIR__ . '/../../Core/Helpers.php';
+require_once __DIR__ . '/../Models/Agent.php';
+require_once __DIR__ . '/../Models/Thread.php';
 
 class AgentsAPI {
     

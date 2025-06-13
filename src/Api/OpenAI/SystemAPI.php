@@ -1,7 +1,7 @@
 <?php
 // src/Api/SystemAPI.php - REFACTORED for single responsibility
 
-require_once __DIR__ . '/../Core/Helpers.php';
+require_once __DIR__ . '/../../Core/Helpers.php';
 
 class SystemAPI {
     private $apiKey;

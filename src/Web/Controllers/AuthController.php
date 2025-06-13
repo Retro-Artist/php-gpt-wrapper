@@ -1,5 +1,5 @@
 <?php
-// src/Web/Controllers/AuthController.php
+// src/Web/Controllers/AuthController.php - UPDATED PATHS
 
 require_once __DIR__ . '/../../Core/Helpers.php';
 require_once __DIR__ . '/../../Core/Security.php';

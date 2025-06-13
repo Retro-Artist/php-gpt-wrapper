@@ -1,7 +1,7 @@
 <?php
-// src/Api/ToolsAPI.php
+// src/Api/OpenAI/ToolsAPI.php - UPDATED PATHS
 
-require_once __DIR__ . '/../Core/Helpers.php';
+require_once __DIR__ . '/../../Core/Helpers.php';
 
 class ToolsAPI {
     
@@ -46,7 +46,7 @@ class ToolsAPI {
         Helpers::validateRequired($input, ['parameters']);
         
         try {
-            // Load the tool
+            // Load the tool - UPDATED PATH
             $toolFile = __DIR__ . "/../Tools/{$toolName}.php";
             
             if (!file_exists($toolFile)) {

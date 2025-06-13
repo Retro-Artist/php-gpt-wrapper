@@ -1,8 +1,8 @@
 <?php
-// src/Web/Controllers/AgentController.php
+// src/Web/Controllers/AgentController.php - UPDATED PATHS
 
 require_once __DIR__ . '/../../Core/Helpers.php';
-require_once __DIR__ . '/../Models/Agent.php';
+require_once __DIR__ . '/../../Api/Models/Agent.php';
 
 class AgentController {
     

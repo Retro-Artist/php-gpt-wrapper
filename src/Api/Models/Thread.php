@@ -1,5 +1,5 @@
 <?php
-// src/Web/Models/Thread.php
+// src/Api/Models/Thread.php - UPDATED PATHS
 
 require_once __DIR__ . '/../../Core/Database.php';
 

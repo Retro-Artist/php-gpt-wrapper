@@ -1,5 +1,5 @@
 <?php
-// src/Web/Controllers/HomeController.php
+// src/Web/Controllers/HomeController.php - UPDATED PATHS
 
 require_once __DIR__ . '/../../Core/Helpers.php';
 

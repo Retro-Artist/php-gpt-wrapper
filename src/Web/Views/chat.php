@@ -26,6 +26,7 @@ ob_start();
                 <div 
                     class="thread-item p-3 mb-2 rounded-lg cursor-pointer hover:bg-gray-50 <?= $thread['id'] == $currentThread['id'] ? 'bg-primary-50 border border-primary-200' : 'bg-white border border-gray-200' ?>"
                     data-thread-id="<?= $thread['id'] ?>"
+                    onclick="switchToThread(<?= $thread['id'] ?>)"
                 >
                     <div class="font-medium text-gray-900 truncate">
                         <?= htmlspecialchars($thread['title']) ?>
@@ -74,7 +75,7 @@ ob_start();
                         <?php else: ?>
                         <div class="flex items-center space-x-2">
                             <span class="text-sm text-gray-500">No agents available</span>
-                            <a href="/dashboard" class="text-sm text-primary-600 hover:text-primary-500">Create one</a>
+                            <a href="/agents" class="text-sm text-primary-600 hover:text-primary-500">Create one</a>
                         </div>
                         <?php endif; ?>
                     </div>
@@ -149,6 +150,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const newThreadBtn = document.getElementById('new-thread-btn');
     const agentSelect = document.getElementById('agent-select');
     const agentStatus = document.getElementById('agent-status');
+    const currentThreadTitle = document.getElementById('current-thread-title');
     
     let currentThreadId = <?= $currentThread['id'] ?>;
     let currentAgentId = <?= $selectedAgentId ? $selectedAgentId : 'null' ?>;
@@ -361,8 +363,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 throw new Error('Failed to create thread');
             }
             
-            // Redirect to refresh page with new thread
-            window.location.reload();
+            const newThread = await response.json();
+            
+            // Redirect to the new thread
+            window.location.href = `/chat?thread=${newThread.id}`;
             
         } catch (error) {
             console.error('Error creating thread:', error);
@@ -372,7 +376,16 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Focus message input on load
     messageInput.focus();
+    
+    // Scroll to bottom of messages
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
 });
+
+// GLOBAL FUNCTION: Switch to different thread
+function switchToThread(threadId) {
+    // Navigate to the selected thread
+    window.location.href = `/chat?thread=${threadId}`;
+}
 </script>
 
 <?php 

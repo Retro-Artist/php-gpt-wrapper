@@ -1,7 +1,7 @@
 <?php
-// src/Tools/Search.php
+// src/Api/Tools/Search.php - UPDATED with Tool base class
 
-require_once __DIR__ . '/Math.php'; // For Tool base class
+require_once __DIR__ . '/../Models/Tool.php';
 
 class Search extends Tool {
     
@@ -94,46 +94,5 @@ class Search extends Tool {
         
         // Return only the requested number of results
         return array_slice($mockResults, 0, $numResults);
-    }
-    
-    /**
-     * Real implementation would use a search API like this:
-     */
-    private function realWebSearch($query, $numResults) {
-        // Example integration with Google Custom Search API
-        /*
-        $apiKey = getenv('GOOGLE_SEARCH_API_KEY');
-        $searchEngineId = getenv('GOOGLE_SEARCH_ENGINE_ID');
-        
-        if (!$apiKey || !$searchEngineId) {
-            throw new Exception('Google Search API not configured');
-        }
-        
-        $url = "https://www.googleapis.com/customsearch/v1?" . http_build_query([
-            'key' => $apiKey,
-            'cx' => $searchEngineId,
-            'q' => $query,
-            'num' => $numResults
-        ]);
-        
-        $response = file_get_contents($url);
-        $data = json_decode($response, true);
-        
-        if (!$data || isset($data['error'])) {
-            throw new Exception('Search API error');
-        }
-        
-        $results = [];
-        foreach ($data['items'] ?? [] as $item) {
-            $results[] = [
-                'title' => $item['title'],
-                'url' => $item['link'],
-                'description' => $item['snippet'] ?? '',
-                'relevance_score' => 1.0
-            ];
-        }
-        
-        return $results;
-        */
     }
 }
