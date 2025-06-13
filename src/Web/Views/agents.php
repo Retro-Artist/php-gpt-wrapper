@@ -3,261 +3,432 @@ $pageTitle = 'Agents - OpenAI Webchat';
 ob_start(); 
 ?>
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <!-- Header -->
-    <div class="md:flex md:items-center md:justify-between mb-8">
-        <div class="flex-1 min-w-0">
-            <h1 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-                My Agents
-            </h1>
-            <p class="mt-1 text-sm text-gray-500">
-                Create and manage your AI agents with custom tools and capabilities
-            </p>
-        </div>
-        <div class="mt-4 flex md:mt-0 md:ml-4">
-            <button 
-                id="create-agent-btn"
-                class="ml-3 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-            >
-                <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                </svg>
-                Create Agent
-            </button>
+<div class="mx-auto max-w-(--breakpoint-2xl) p-4 md:p-6">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-title-md font-bold text-gray-800 dark:text-white/90">
+                    My Agents
+                </h1>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    Create and manage your AI agents with custom tools and capabilities
+                </p>
+            </div>
+            <div class="flex items-center gap-3">
+                <button 
+                    onclick="window.location.href='/chat'"
+                    class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+                >
+                    <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                    </svg>
+                    Test in Chat
+                </button>
+                <button 
+                    id="create-agent-btn"
+                    class="inline-flex items-center justify-center rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white shadow-theme-xs hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
+                >
+                    <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Create Agent
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- Quick Stats -->
-    <div class="grid grid-cols-1 gap-5 sm:grid-cols-3 mb-8">
-        <div class="bg-white overflow-hidden shadow rounded-lg">
-            <div class="p-5">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+    <!-- Quick Stats Grid -->
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-3 mb-8">
+        <!-- Total Agents -->
+        <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-theme-xs dark:border-gray-800 dark:bg-white/[0.03]">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-brand-100 dark:bg-brand-900/20">
+                        <svg class="h-6 w-6 text-brand-600 dark:text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                         </svg>
                     </div>
-                    <div class="ml-5 w-0 flex-1">
-                        <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Total Agents</dt>
-                            <dd class="text-lg font-medium text-gray-900"><?= count($agents) ?></dd>
-                        </dl>
-                    </div>
+                </div>
+                <div class="ml-4 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+                            Total Agents
+                        </dt>
+                        <dd class="text-2xl font-bold text-gray-900 dark:text-white/90">
+                            <?= count($agents) ?>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+            <div class="mt-4">
+                <div class="flex items-center text-sm">
+                    <span class="text-gray-600 dark:text-gray-400">
+                        <?= count(array_filter($agents, fn($a) => $a->isActive())) ?> active
+                    </span>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white overflow-hidden shadow rounded-lg">
-            <div class="p-5">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        <!-- Tools Available -->
+        <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-theme-xs dark:border-gray-800 dark:bg-white/[0.03]">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/20">
+                        <svg class="h-6 w-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                         </svg>
                     </div>
-                    <div class="ml-5 w-0 flex-1">
-                        <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Tools Available</dt>
-                            <dd class="text-lg font-medium text-gray-900">4</dd>
-                        </dl>
-                    </div>
+                </div>
+                <div class="ml-4 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+                            Tools Available
+                        </dt>
+                        <dd class="text-2xl font-bold text-gray-900 dark:text-white/90">
+                            4
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+            <div class="mt-4">
+                <div class="flex items-center text-sm">
+                    <span class="text-gray-600 dark:text-gray-400">
+                        Math, Search, Weather, PDF
+                    </span>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white overflow-hidden shadow rounded-lg">
-            <div class="p-5">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+        <!-- Agents with Tools -->
+        <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-theme-xs dark:border-gray-800 dark:bg-white/[0.03]">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/20">
+                        <svg class="h-6 w-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                         </svg>
                     </div>
-                    <div class="ml-5 w-0 flex-1">
-                        <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Active Agents</dt>
-                            <dd class="text-lg font-medium text-gray-900"><?= count(array_filter($agents, fn($a) => $a->isActive())) ?></dd>
-                        </dl>
-                    </div>
+                </div>
+                <div class="ml-4 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+                            Tool-Enabled
+                        </dt>
+                        <dd class="text-2xl font-bold text-gray-900 dark:text-white/90">
+                            <?= count(array_filter($agents, fn($a) => !empty($a->getTools()))) ?>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+            <div class="mt-4">
+                <div class="flex items-center text-sm">
+                    <span class="text-green-600 dark:text-green-400 font-medium">
+                        Enhanced capabilities
+                    </span>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Agents List -->
-    <div class="bg-white shadow overflow-hidden sm:rounded-md">
-        <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
-            <h3 class="text-lg leading-6 font-medium text-gray-900">Your Agents</h3>
-            <p class="mt-1 max-w-2xl text-sm text-gray-500">Manage your custom AI agents and their capabilities</p>
+    <div class="rounded-2xl border border-gray-200 bg-white shadow-theme-xs dark:border-gray-800 dark:bg-white/[0.03]">
+        <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100 dark:border-gray-800">
+            <div>
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white/90">
+                    Your Agents
+                </h3>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    Manage your custom AI agents and their capabilities
+                </p>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-sm text-gray-500 dark:text-gray-400">
+                        <?= count($agents) ?> total
+                    </span>
+                </div>
+            </div>
         </div>
         
         <?php if (empty($agents)): ?>
-            <div class="text-center py-12">
-                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                </svg>
-                <h3 class="mt-2 text-sm font-medium text-gray-900">No agents</h3>
-                <p class="mt-1 text-sm text-gray-500">Get started by creating your first AI agent.</p>
-                <div class="mt-6">
+            <div class="text-center py-16 px-6">
+                <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
+                    <svg class="h-10 w-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <h3 class="mt-6 text-lg font-medium text-gray-900 dark:text-white/90">
+                    No agents created yet
+                </h3>
+                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
+                    Get started by creating your first AI agent with custom tools and capabilities.
+                </p>
+                <div class="mt-8">
                     <button 
                         id="create-first-agent-btn"
-                        class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                        class="inline-flex items-center justify-center rounded-lg bg-brand-500 px-6 py-3 text-sm font-medium text-white shadow-theme-xs hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
                     >
-                        <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                         </svg>
-                        Create Agent
+                        Create Your First Agent
                     </button>
                 </div>
             </div>
         <?php else: ?>
-            <ul class="divide-y divide-gray-200">
+            <div class="divide-y divide-gray-100 dark:divide-gray-800">
                 <?php foreach ($agents as $agent): ?>
-                <li class="px-4 py-4 sm:px-6 hover:bg-gray-50">
+                <div class="group p-6 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors duration-200">
                     <div class="flex items-center justify-between">
-                        <div class="flex items-center">
+                        <div class="flex items-center gap-4 min-w-0 flex-1">
+                            <!-- Agent Avatar -->
                             <div class="flex-shrink-0">
-                                <div class="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center">
-                                    <svg class="h-6 w-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                <div class="h-12 w-12 rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center shadow-theme-sm">
+                                    <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                                     </svg>
                                 </div>
                             </div>
-                            <div class="ml-4">
-                                <div class="flex items-center">
-                                    <p class="text-sm font-medium text-gray-900"><?= htmlspecialchars($agent->getName()) ?></p>
+                            
+                            <!-- Agent Info -->
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <h4 class="text-base font-semibold text-gray-900 dark:text-white/90 truncate">
+                                        <?= htmlspecialchars($agent->getName()) ?>
+                                    </h4>
                                     <?php if (!$agent->isActive()): ?>
-                                        <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                        <span class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800 dark:bg-red-900/20 dark:text-red-400">
                                             Inactive
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/20 dark:text-green-400">
+                                            Active
                                         </span>
                                     <?php endif; ?>
                                 </div>
-                                <p class="text-sm text-gray-500 mt-1"><?= htmlspecialchars(substr($agent->getInstructions(), 0, 100)) ?>...</p>
-                                <div class="flex items-center mt-2 space-x-4">
-                                    <span class="text-xs text-gray-500">Model: <?= htmlspecialchars($agent->getModel()) ?></span>
-                                    <span class="text-xs text-gray-500">Tools: <?= count($agent->getTools()) ?></span>
+                                
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
+                                    <?= htmlspecialchars(substr($agent->getInstructions(), 0, 120)) ?><?= strlen($agent->getInstructions()) > 120 ? '...' : '' ?>
+                                </p>
+                                
+                                <!-- Agent Details -->
+                                <div class="flex items-center gap-6 text-xs text-gray-500 dark:text-gray-400">
+                                    <div class="flex items-center gap-1">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        <span>Model: <?= htmlspecialchars($agent->getModel()) ?></span>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        </svg>
+                                        <span><?= count($agent->getTools()) ?> tools</span>
+                                    </div>
+                                    <?php if (!empty($agent->getTools())): ?>
+                                    <div class="flex items-center gap-1">
+                                        <span class="inline-flex items-center gap-1">
+                                            <?php foreach (array_slice($agent->getTools(), 0, 3) as $tool): ?>
+                                                <span class="inline-flex items-center rounded-md bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700 dark:bg-brand-900/20 dark:text-brand-400">
+                                                    <?= htmlspecialchars($tool) ?>
+                                                </span>
+                                            <?php endforeach; ?>
+                                            <?php if (count($agent->getTools()) > 3): ?>
+                                                <span class="text-gray-400">+<?= count($agent->getTools()) - 3 ?></span>
+                                            <?php endif; ?>
+                                        </span>
+                                    </div>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
-                        <div class="flex items-center space-x-2">
+                        
+                        <!-- Action Buttons -->
+                        <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                             <button 
                                 onclick="testAgent(<?= $agent->getId() ?>)"
-                                class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                                class="inline-flex items-center justify-center rounded-lg bg-green-100 px-3 py-2 text-sm font-medium text-green-700 hover:bg-green-200 dark:bg-green-900/20 dark:text-green-400 dark:hover:bg-green-900/40 transition-colors"
+                                title="Test Agent"
                             >
-                                Test
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M18 10h.01M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z"></path>
+                                </svg>
+                                <span class="ml-1.5 hidden sm:block">Test</span>
                             </button>
+                            
                             <button 
                                 onclick="editAgent(<?= $agent->getId() ?>)"
-                                class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                                class="inline-flex items-center justify-center rounded-lg bg-gray-100 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 transition-colors"
+                                title="Edit Agent"
                             >
-                                Edit
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                                <span class="ml-1.5 hidden sm:block">Edit</span>
                             </button>
+                            
                             <button 
-                                onclick="deleteAgent(<?= $agent->getId() ?>)"
-                                class="inline-flex items-center px-3 py-1.5 border border-red-300 shadow-sm text-xs font-medium rounded text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                                onclick="deleteAgent(<?= $agent->getId() ?>, '<?= htmlspecialchars($agent->getName()) ?>')"
+                                class="inline-flex items-center justify-center rounded-lg bg-red-100 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-200 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40 transition-colors"
+                                title="Delete Agent"
                             >
-                                Delete
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                                <span class="ml-1.5 hidden sm:block">Delete</span>
                             </button>
                         </div>
                     </div>
-                </li>
+                </div>
                 <?php endforeach; ?>
-            </ul>
+            </div>
         <?php endif; ?>
     </div>
 </div>
 
 <!-- Create Agent Modal -->
-<div id="create-agent-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
-        <div class="mt-3">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-medium text-gray-900">Create New Agent</h3>
-                <button onclick="closeCreateModal()" class="text-gray-400 hover:text-gray-600">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
+<div id="create-agent-modal" class="hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border-0 w-11/12 md:w-3/4 lg:w-1/2 max-w-2xl shadow-theme-xl rounded-2xl bg-white dark:bg-gray-900">
+        <div class="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800">
+            <div>
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white/90">
+                    Create New Agent
+                </h3>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    Design a custom AI agent with specific tools and capabilities
+                </p>
+            </div>
+            <button onclick="closeCreateModal()" class="rounded-lg p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        
+        <form id="create-agent-form" class="p-6 space-y-6">
+            <!-- Agent Name -->
+            <div>
+                <label for="agent-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Agent Name
+                </label>
+                <input 
+                    type="text" 
+                    id="agent-name" 
+                    name="name" 
+                    required
+                    class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 shadow-theme-xs focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
+                    placeholder="e.g., Code Assistant, Research Helper, Data Analyst"
+                >
             </div>
             
-            <form id="create-agent-form" class="space-y-4">
-                <div>
-                    <label for="agent-name" class="block text-sm font-medium text-gray-700">Agent Name</label>
-                    <input 
-                        type="text" 
-                        id="agent-name" 
-                        name="name" 
-                        required
-                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500"
-                        placeholder="e.g., Code Assistant, Research Helper"
-                    >
+            <!-- Instructions -->
+            <div>
+                <label for="agent-instructions" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Instructions & Personality
+                </label>
+                <textarea 
+                    id="agent-instructions" 
+                    name="instructions" 
+                    rows="4" 
+                    required
+                    class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 shadow-theme-xs focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
+                    placeholder="Describe what this agent should do, how it should behave, and its personality. Be specific about its role and capabilities..."
+                ></textarea>
+                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                    Pro tip: Be specific about the agent's role, expertise, and communication style for best results.
+                </p>
+            </div>
+            
+            <!-- Model Selection -->
+            <div>
+                <label for="agent-model" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    AI Model
+                </label>
+                <select 
+                    id="agent-model" 
+                    name="model"
+                    class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-theme-xs focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+                >
+                    <option value="gpt-4o-mini">GPT-4O Mini - Fast & Cost-effective</option>
+                    <option value="gpt-4o">GPT-4O - Most Capable</option>
+                    <option value="gpt-4">GPT-4 - Legacy but Reliable</option>
+                </select>
+            </div>
+            
+            <!-- Tools Selection -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                    Available Tools
+                </label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <label class="relative flex items-start p-3 border border-gray-200 rounded-lg hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800/50 cursor-pointer transition-colors">
+                        <div class="flex items-center h-5">
+                            <input type="checkbox" name="tools" value="Math" class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-700">
+                        </div>
+                        <div class="ml-3 min-w-0 flex-1">
+                            <div class="text-sm font-medium text-gray-900 dark:text-white">Math Calculator</div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400">Perform mathematical calculations safely</div>
+                        </div>
+                    </label>
+                    
+                    <label class="relative flex items-start p-3 border border-gray-200 rounded-lg hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800/50 cursor-pointer transition-colors">
+                        <div class="flex items-center h-5">
+                            <input type="checkbox" name="tools" value="Search" class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-700">
+                        </div>
+                        <div class="ml-3 min-w-0 flex-1">
+                            <div class="text-sm font-medium text-gray-900 dark:text-white">Web Search</div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400">Search for current information on the web</div>
+                        </div>
+                    </label>
+                    
+                    <label class="relative flex items-start p-3 border border-gray-200 rounded-lg hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800/50 cursor-pointer transition-colors">
+                        <div class="flex items-center h-5">
+                            <input type="checkbox" name="tools" value="Weather" class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-700">
+                        </div>
+                        <div class="ml-3 min-w-0 flex-1">
+                            <div class="text-sm font-medium text-gray-900 dark:text-white">Weather Information</div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400">Get weather information for any location</div>
+                        </div>
+                    </label>
+                    
+                    <label class="relative flex items-start p-3 border border-gray-200 rounded-lg hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800/50 cursor-pointer transition-colors">
+                        <div class="flex items-center h-5">
+                            <input type="checkbox" name="tools" value="ReadPDF" class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-700">
+                        </div>
+                        <div class="ml-3 min-w-0 flex-1">
+                            <div class="text-sm font-medium text-gray-900 dark:text-white">PDF Reader</div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400">Extract text and information from PDF files</div>
+                        </div>
+                    </label>
                 </div>
-                
-                <div>
-                    <label for="agent-instructions" class="block text-sm font-medium text-gray-700">Instructions</label>
-                    <textarea 
-                        id="agent-instructions" 
-                        name="instructions" 
-                        rows="4" 
-                        required
-                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500"
-                        placeholder="Describe what this agent should do and how it should behave..."
-                    ></textarea>
-                </div>
-                
-                <div>
-                    <label for="agent-model" class="block text-sm font-medium text-gray-700">Model</label>
-                    <select 
-                        id="agent-model" 
-                        name="model"
-                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500"
-                    >
-                        <option value="gpt-4o-mini">GPT-4O Mini (Fast & Cost-effective)</option>
-                        <option value="gpt-4o">GPT-4O (Most Capable)</option>
-                        <option value="gpt-4">GPT-4 (Legacy)</option>
-                    </select>
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Available Tools</label>
-                    <div class="mt-2 space-y-2">
-                        <label class="flex items-center">
-                            <input type="checkbox" name="tools" value="Math" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
-                            <span class="ml-2 text-sm text-gray-900">Math - Mathematical calculations</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="checkbox" name="tools" value="Search" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
-                            <span class="ml-2 text-sm text-gray-900">Search - Search for current information</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="checkbox" name="tools" value="Weather" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
-                            <span class="ml-2 text-sm text-gray-900">Weather - Get weather information for any location</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="checkbox" name="tools" value="ReadPDF" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
-                            <span class="ml-2 text-sm text-gray-900">ReadPDF - Extract text from PDF files</span>
-                        </label>
-                    </div>
-                </div>
-                
-                <div class="flex justify-end space-x-3 pt-4">
-                    <button 
-                        type="button" 
-                        onclick="closeCreateModal()"
-                        class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-                    >
-                        Cancel
-                    </button>
-                    <button 
-                        type="submit"
-                        class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-                    >
-                        Create Agent
-                    </button>
-                </div>
-            </form>
-        </div>
+                <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">
+                    Select the tools your agent should have access to. Tools enhance your agent's capabilities.
+                </p>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="flex justify-end space-x-3 pt-6 border-t border-gray-100 dark:border-gray-800">
+                <button 
+                    type="button" 
+                    onclick="closeCreateModal()"
+                    class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+                >
+                    Cancel
+                </button>
+                <button 
+                    type="submit"
+                    class="inline-flex items-center justify-center rounded-lg bg-brand-500 px-6 py-2.5 text-sm font-medium text-white shadow-theme-xs hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
+                >
+                    <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Create Agent
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -275,6 +446,8 @@ document.addEventListener('DOMContentLoaded', function() {
     createAgentBtns.forEach(btn => {
         btn?.addEventListener('click', function() {
             createAgentModal.classList.remove('hidden');
+            // Focus first input
+            document.getElementById('agent-name').focus();
         });
     });
     
@@ -293,7 +466,20 @@ document.addEventListener('DOMContentLoaded', function() {
             tools: tools
         };
         
+        const submitBtn = createAgentForm.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        
         try {
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `
+                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Creating...
+            `;
+            
             const response = await fetch('/api/agents', {
                 method: 'POST',
                 headers: {
@@ -304,17 +490,27 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             
             if (!response.ok) {
-                throw new Error('Failed to create agent');
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || `Failed to create agent (${response.status})`);
             }
             
             const result = await response.json();
             
+            // Show success message
+            showToast('success', `Agent "${agentData.name}" created successfully!`);
+            
             // Reload page to show new agent
-            window.location.reload();
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
             
         } catch (error) {
             console.error('Error creating agent:', error);
-            alert('Failed to create agent. Please try again.');
+            showToast('error', error.message || 'Failed to create agent. Please try again.');
+            
+            // Reset button
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
         }
     });
 });
@@ -335,11 +531,17 @@ function testAgent(agentId) {
 function editAgent(agentId) {
     // For now, show a simple alert
     // In a full implementation, you'd show an edit modal
-    alert(`Edit agent ${agentId} - Feature coming soon!`);
+    showToast('warning', 'Edit functionality coming soon! For now, you can create a new agent or delete this one.');
 }
 
-async function deleteAgent(agentId) {
-    if (!confirm('Are you sure you want to delete this agent? This action cannot be undone.')) {
+async function deleteAgent(agentId, agentName) {
+    // Enhanced confirmation dialog
+    const confirmed = confirm(
+        `Are you sure you want to delete "${agentName}"?\n\n` +
+        'This action cannot be undone and will permanently remove the agent and all its configurations.'
+    );
+    
+    if (!confirmed) {
         return;
     }
     
@@ -352,15 +554,21 @@ async function deleteAgent(agentId) {
         });
         
         if (!response.ok) {
-            throw new Error('Failed to delete agent');
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `Failed to delete agent (${response.status})`);
         }
         
+        // Show success message
+        showToast('success', `Agent "${agentName}" deleted successfully.`);
+        
         // Reload page to update list
-        window.location.reload();
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000);
         
     } catch (error) {
         console.error('Error deleting agent:', error);
-        alert('Failed to delete agent. Please try again.');
+        showToast('error', error.message || 'Failed to delete agent. Please try again.');
     }
 }
 
@@ -369,6 +577,28 @@ document.getElementById('create-agent-modal').addEventListener('click', function
     if (e.target === this) {
         closeCreateModal();
     }
+});
+
+// Enhanced keyboard support
+document.addEventListener('keydown', function(e) {
+    const modal = document.getElementById('create-agent-modal');
+    
+    // Close modal on Escape key
+    if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+        closeCreateModal();
+    }
+    
+    // Submit form on Ctrl/Cmd + Enter
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && !modal.classList.contains('hidden')) {
+        e.preventDefault();
+        document.getElementById('create-agent-form').dispatchEvent(new Event('submit'));
+    }
+});
+
+// Auto-resize textarea in modal
+document.getElementById('agent-instructions')?.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 200) + 'px';
 });
 </script>
 
