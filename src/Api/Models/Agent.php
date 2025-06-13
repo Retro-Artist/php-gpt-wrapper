@@ -1,5 +1,5 @@
 <?php
-// src/Api/Models/Agent.php - UPDATED PATHS
+// src/Api/Models/Agent.php - FIXED DELETE METHOD
 
 require_once __DIR__ . '/../../Core/Database.php';
 require_once __DIR__ . '/../../Core/Helpers.php';
@@ -52,13 +52,15 @@ class Agent {
     public function save() {
         if ($this->id) {
             // Update existing agent
-            $this->db->update('agents', [
+            $result = $this->db->update('agents', [
                 'name' => $this->name,
                 'instructions' => $this->instructions,
                 'model' => $this->model,
                 'tools' => json_encode($this->tools),
-                'is_active' => $this->isActive
+                'is_active' => $this->isActive ? 1 : 0
             ], 'id = ?', [$this->id]);
+            
+            error_log("Updated agent {$this->id}: " . ($result ? 'success' : 'failed'));
         } else {
             // Create new agent
             $this->id = $this->db->insert('agents', [
@@ -67,8 +69,10 @@ class Agent {
                 'model' => $this->model,
                 'tools' => json_encode($this->tools),
                 'user_id' => $this->userId,
-                'is_active' => $this->isActive
+                'is_active' => $this->isActive ? 1 : 0
             ]);
+            
+            error_log("Created new agent with ID: {$this->id}");
         }
         
         return $this;
@@ -76,7 +80,7 @@ class Agent {
     
     public static function findById($agentId) {
         $db = Database::getInstance();
-        $data = $db->fetch("SELECT * FROM agents WHERE id = ?", [$agentId]);
+        $data = $db->fetch("SELECT * FROM agents WHERE id = ? AND is_active = 1", [$agentId]);
         
         if (!$data) {
             return null;
@@ -89,7 +93,7 @@ class Agent {
         $db = Database::getInstance();
         $results = $db->fetchAll("
             SELECT * FROM agents 
-            WHERE user_id = ? AND is_active = true 
+            WHERE user_id = ? AND is_active = 1 
             ORDER BY created_at DESC
         ", [$userId]);
         
@@ -105,7 +109,7 @@ class Agent {
         $agent = new self($data['name'], $data['instructions'], $data['model']);
         $agent->id = $data['id'];
         $agent->userId = $data['user_id'];
-        $agent->isActive = $data['is_active'];
+        $agent->isActive = (bool)$data['is_active'];
         $agent->tools = json_decode($data['tools'] ?? '[]', true);
         return $agent;
     }
@@ -402,8 +406,27 @@ class Agent {
     
     public function delete() {
         if ($this->id) {
-            $this->db->update('agents', ['is_active' => false], 'id = ?', [$this->id]);
+            error_log("Attempting to delete agent {$this->id}");
+            
+            // Set is_active to false instead of actually deleting
+            $result = $this->db->update('agents', 
+                ['is_active' => 0], 
+                'id = ?', 
+                [$this->id]
+            );
+            
+            if ($result) {
+                error_log("Successfully marked agent {$this->id} as inactive");
+                $this->isActive = false;
+            } else {
+                error_log("Failed to update agent {$this->id}");
+                throw new Exception("Failed to delete agent");
+            }
+        } else {
+            error_log("Cannot delete agent: no ID set");
+            throw new Exception("Cannot delete agent: no ID set");
         }
+        
         return $this;
     }
     
