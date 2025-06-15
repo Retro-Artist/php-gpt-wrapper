@@ -14,71 +14,58 @@ A clean, maintainable OpenAI-powered webchat application featuring dynamic agent
 
 ### Hybrid Web + API Architecture
 - **Web Routes**: Public URLs users navigate to (`/chat`, `/login`)
-- **API Routes**: Internal AJAX endpoints (`/api/threads`, `/api/messages`)
+- **API Routes**: Internal endpoints (`/api/threads`, `/api/messages`)
 - **Shared Foundation**: Same models, services, and business logic
 - **Different Responses**: Web returns HTML, API returns JSON
 
 ## Directory Structure
 
 ```
-gpt-wrapper/
-├── app
-│   ├── database.sql
-│   ├── generate_agents.php
-│   └── migrate.php
-├── config
-│   ├── config.php          # Configuration 
-│   └── load_env.php
-├── logs
-├── public                  # Web root - Single entry point
-│   ├── favicon.ico
-│   └── index.php
-├── src                                  # Application logic
-│   ├── Api                              # API resource controllers (return JSONS)
+src/
+├── Api
+│   ├── Models
+│   │   ├── Agent.php
+│   │   ├── Run.php
+│   │   ├── Thread.php
+│   │   └── Tool.php
+│   ├── OpenAI
 │   │   ├── AgentsAPI.php
 │   │   ├── SystemAPI.php
 │   │   ├── ThreadsAPI.php
 │   │   └── ToolsAPI.php
-│   ├── Core
-│   │   ├── Database.php
-│   │   ├── Helpers.php
-│   │   ├── Logger.php
-│   │   ├── Router.php                   # Handles both web and API routes
-│   │   └── Security.php
-│   ├── Tools                            # Assistant Tool implementations
-│   │   ├── Math.php
-│   │   ├── ReadPDF.php
-│   │   ├── Search.php
-│   │   └── Weather.php
-│   └── Web
-│       ├── Controllers                  # Web page controllers (return HTML)
-│       │   ├── AgentController.php
-│       │   ├── AuthController.php
-│       │   ├── ChatController.php
-│       │   ├── DashboardController.php
-│       │   └── HomeController.php
-│       ├── Models                       # Database entities & abstractions
-│       │   ├── User.php
-│       │   ├── Agent.php                # Dynamic agent instances
-│       │   ├── Run.php                  # Agent execution tracking
-│       │   ├── Thread.php               # conversation functionalities
-│       │   └── Tool.php                 # Abstract base for all tools
-│       └── Views
-│           ├── agents.php
-│           ├── chat.php
-│           ├── dashboard.php
-│           ├── error.php
-│           ├── home.php
-│           ├── layout.php
-│           ├── login.php
-│           └── register.php
-├── tests
-├── composer.json
-├── docker-compose.yml
-├── Dockerfile
-├── nginx.conf
-└── README.md
+│   └── Tools
+│       ├── Math.php
+│       ├── ReadPDF.php
+│       ├── Search.php
+│       └── Weather.php
+├── Core
+│   ├── Database.php
+│   ├── Helpers.php
+│   ├── Logger.php
+│   ├── Router.php
+│   └── Security.php
+└── Web
+    ├── Controllers
+    │   ├── AgentController.php
+    │   ├── AuthController.php
+    │   ├── ChatController.php
+    │   ├── DashboardController.php
+    │   └── HomeController.php
+    ├── Models
+    │   ├── ChatSession.php
+    │   ├── Project.php
+    │   └── User.php
+    └── Views
+        ├── agents.php
+        ├── chat.php
+        ├── dashboard.php
+        ├── error.php
+        ├── home.php
+        ├── layout.php
+        ├── login.php
+        └── register.php
 ```
+
 
 ## Technology Stack
 
