@@ -72,7 +72,7 @@ class Router {
     private function callHandler($route) {
         list($handlerName, $methodName) = explode('@', $route['handler']);
         
-        // Determine handler directory based on route type - UPDATED PATHS
+        // Determine handler directory based on route type  
         if ($route['type'] === 'api') {
             $handlerFile = __DIR__ . "/../Api/OpenAI/{$handlerName}.php";
         } else {

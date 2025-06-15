@@ -1,5 +1,5 @@
 <?php
-// src/Api/OpenAI/ThreadsAPI.php - UPDATED PATHS
+// src/Api/OpenAI/ThreadsAPI.php  
 
 require_once __DIR__ . '/../../Core/Helpers.php';
 require_once __DIR__ . '/../Models/Thread.php';

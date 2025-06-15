@@ -1,5 +1,5 @@
 <?php
-// src/Web/Controllers/AuthController.php - UPDATED PATHS
+// src/Web/Controllers/AuthController.php  
 
 require_once __DIR__ . '/../../Core/Helpers.php';
 require_once __DIR__ . '/../../Core/Security.php';
@@ -8,9 +8,9 @@ require_once __DIR__ . '/../Models/User.php';
 class AuthController {
     
     public function showLogin() {
-        // If already logged in, redirect to chat
+        // If already logged in, redirect to dashboard
         if (Helpers::isAuthenticated()) {
-            Helpers::redirect('/chat');
+            Helpers::redirect('/dashboard');
         }
         
         // Load login view
@@ -44,8 +44,8 @@ class AuthController {
                     // Update last login
                     $userModel->updateLastLogin($user['id']);
                     
-                    // Redirect to chat
-                    Helpers::redirect('/chat');
+                    // Redirect to dashboard instead of chat
+                    Helpers::redirect('/dashboard');
                 } else {
                     $error = 'Invalid username or password';
                 }
@@ -63,9 +63,9 @@ class AuthController {
     }
     
     public function showRegister() {
-        // If already logged in, redirect to chat
+        // If already logged in, redirect to dashboard
         if (Helpers::isAuthenticated()) {
-            Helpers::redirect('/chat');
+            Helpers::redirect('/dashboard');
         }
         
         // Load register view
@@ -103,8 +103,8 @@ class AuthController {
                 $_SESSION['username'] = $user['username'];
                 $_SESSION['email'] = $user['email'];
                 
-                // Redirect to chat
-                Helpers::redirect('/chat');
+                // Redirect to dashboard instead of chat
+                Helpers::redirect('/dashboard');
                 
             } catch (Exception $e) {
                 $error = $e->getMessage();

@@ -1,5 +1,5 @@
 <?php
-// src/Api/Models/Agent.php - FIXED DELETE METHOD
+// Updated src/Api/Models/Agent.php - Fixed delete method
 
 require_once __DIR__ . '/../../Core/Database.php';
 require_once __DIR__ . '/../../Core/Helpers.php';
@@ -139,7 +139,7 @@ class Agent {
     }
     
     private function executeWithTools($message, $threadId) {
-        // Get conversation history - UPDATED PATH
+        // Get conversation history
         require_once __DIR__ . '/Thread.php';
         $messages = Thread::getMessages($threadId);
         
@@ -299,7 +299,6 @@ class Agent {
         
         foreach ($this->tools as $toolClassName) {
             try {
-                // UPDATED PATH
                 $toolFile = __DIR__ . "/../Tools/{$toolClassName}.php";
                 
                 if (file_exists($toolFile)) {
@@ -363,7 +362,6 @@ class Agent {
         }
         
         $toolClassName = $toolMap[$toolName];
-        // UPDATED PATH
         $toolFile = __DIR__ . "/../Tools/{$toolClassName}.php";
         
         if (!file_exists($toolFile)) {
@@ -404,11 +402,62 @@ class Agent {
         ], 'id = ?', [$runId]);
     }
     
+    /**
+     * FIXED DELETE METHOD - Actually deletes from database
+     * This method now permanently removes the agent and related data
+     */
     public function delete() {
-        if ($this->id) {
-            error_log("Attempting to delete agent {$this->id}");
+        if (!$this->id) {
+            error_log("Cannot delete agent: no ID set");
+            throw new Exception("Cannot delete agent: no ID set");
+        }
+        
+        error_log("Attempting to permanently delete agent {$this->id}");
+        
+        try {
+            // Begin transaction to ensure data consistency
+            $this->db->getConnection()->beginTransaction();
             
-            // Set is_active to false instead of actually deleting
+            // 1. First, delete related runs (foreign key constraint handling)
+            $deleteRunsResult = $this->db->delete('runs', 'agent_id = ?', [$this->id]);
+            error_log("Deleted runs for agent {$this->id}: affected rows - " . ($deleteRunsResult ? 'success' : 'none'));
+            
+            // 2. Delete the agent itself
+            $deleteAgentResult = $this->db->delete('agents', 'id = ?', [$this->id]);
+            
+            if ($deleteAgentResult) {
+                // Commit the transaction
+                $this->db->getConnection()->commit();
+                error_log("Successfully deleted agent {$this->id} and all related data");
+                
+                // Clear the object state since it's been deleted
+                $this->id = null;
+                $this->isActive = false;
+                
+                return true;
+            } else {
+                // Rollback if agent deletion failed
+                $this->db->getConnection()->rollback();
+                error_log("Failed to delete agent {$this->id} - rolling back transaction");
+                throw new Exception("Failed to delete agent from database");
+            }
+            
+        } catch (Exception $e) {
+            // Rollback transaction on any error
+            $this->db->getConnection()->rollback();
+            error_log("Error deleting agent {$this->id}: " . $e->getMessage());
+            throw new Exception("Database error during agent deletion: " . $e->getMessage());
+        }
+    }
+    
+    /**
+     * Soft delete method (for cases where you want to keep the data but mark as inactive)
+     * This is separate from the main delete() method
+     */
+    public function softDelete() {
+        if ($this->id) {
+            error_log("Soft deleting agent {$this->id} (marking as inactive)");
+            
             $result = $this->db->update('agents', 
                 ['is_active' => 0], 
                 'id = ?', 
@@ -416,18 +465,17 @@ class Agent {
             );
             
             if ($result) {
-                error_log("Successfully marked agent {$this->id} as inactive");
+                error_log("Successfully soft deleted agent {$this->id}");
                 $this->isActive = false;
+                return true;
             } else {
-                error_log("Failed to update agent {$this->id}");
-                throw new Exception("Failed to delete agent");
+                error_log("Failed to soft delete agent {$this->id}");
+                throw new Exception("Failed to deactivate agent");
             }
         } else {
-            error_log("Cannot delete agent: no ID set");
-            throw new Exception("Cannot delete agent: no ID set");
+            error_log("Cannot soft delete agent: no ID set");
+            throw new Exception("Cannot deactivate agent: no ID set");
         }
-        
-        return $this;
     }
     
     // Getters

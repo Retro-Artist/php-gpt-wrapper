@@ -53,10 +53,17 @@ class Helpers {
     
     /**
      * Require authentication for web endpoints
+     * Updated default redirect to dashboard
      */
-    public static function requireWebAuth($redirectTo = '/login') {
+    public static function requireWebAuth($redirectTo = '/dashboard') {
         if (!self::isAuthenticated()) {
-            self::redirect($redirectTo);
+            // If trying to access a protected page, redirect to login
+            // But preserve the intended destination
+            if ($redirectTo === '/dashboard') {
+                self::redirect('/login');
+            } else {
+                self::redirect($redirectTo);
+            }
         }
     }
     
@@ -93,7 +100,7 @@ class Helpers {
     }
     
     /**
-     * Load a view with variables - UPDATED PATH
+     * Load a view with variables
      */
     public static function loadView($viewName, $variables = []) {
         // Extract variables for use in view

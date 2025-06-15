@@ -1,5 +1,5 @@
 <?php
-// src/Api/OpenAI/ToolsAPI.php - UPDATED PATHS
+// src/Api/OpenAI/ToolsAPI.php  
 
 require_once __DIR__ . '/../../Core/Helpers.php';
 

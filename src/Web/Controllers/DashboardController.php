@@ -1,5 +1,5 @@
 <?php
-// src/Web/Controllers/DashboardController.php - UPDATED PATHS
+// src/Web/Controllers/DashboardController.php  
 
 require_once __DIR__ . '/../../Core/Helpers.php';
 require_once __DIR__ . '/../../Api/Models/Thread.php';

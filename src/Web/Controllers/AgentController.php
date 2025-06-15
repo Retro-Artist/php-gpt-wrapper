@@ -1,5 +1,5 @@
 <?php
-// src/Web/Controllers/AgentController.php - UPDATED PATHS
+// src/Web/Controllers/AgentController.php  
 
 require_once __DIR__ . '/../../Core/Helpers.php';
 require_once __DIR__ . '/../../Api/Models/Agent.php';

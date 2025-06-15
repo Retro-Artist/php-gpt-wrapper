@@ -1,5 +1,5 @@
 <?php
-// src/Api/OpenAI/AgentsAPI.php - UPDATED PATHS
+// src/Api/OpenAI/AgentsAPI.php  
 
 require_once __DIR__ . '/../../Core/Helpers.php';
 require_once __DIR__ . '/../Models/Agent.php';
