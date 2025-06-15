@@ -432,6 +432,162 @@ ob_start();
     </div>
 </div>
 
+<!-- Edit Agent Modal -->
+<div id="edit-agent-modal" class="hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border-0 w-11/12 md:w-3/4 lg:w-1/2 max-w-2xl shadow-theme-xl rounded-2xl bg-white dark:bg-gray-900">
+        <div class="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800">
+            <div>
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white/90">
+                    Edit Agent
+                </h3>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    Modify your AI agent's settings and capabilities
+                </p>
+            </div>
+            <button onclick="closeEditModal()" class="rounded-lg p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        
+        <form id="edit-agent-form" class="p-6 space-y-6">
+            <input type="hidden" id="edit-agent-id" name="id">
+            
+            <!-- Agent Name -->
+            <div>
+                <label for="edit-agent-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Agent Name
+                </label>
+                <input 
+                    type="text" 
+                    id="edit-agent-name" 
+                    name="name" 
+                    required
+                    class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 shadow-theme-xs focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
+                    placeholder="e.g., Code Assistant, Research Helper, Data Analyst"
+                >
+            </div>
+            
+            <!-- Instructions -->
+            <div>
+                <label for="edit-agent-instructions" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Instructions & Personality
+                </label>
+                <textarea 
+                    id="edit-agent-instructions" 
+                    name="instructions" 
+                    rows="4" 
+                    required
+                    class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 shadow-theme-xs focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
+                    placeholder="Describe what this agent should do, how it should behave, and its personality..."
+                ></textarea>
+            </div>
+            
+            <!-- Model Selection -->
+            <div>
+                <label for="edit-agent-model" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    AI Model
+                </label>
+                <select 
+                    id="edit-agent-model" 
+                    name="model"
+                    class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-theme-xs focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+                >
+                    <option value="gpt-4o-mini">GPT-4O Mini - Fast & Cost-effective</option>
+                    <option value="gpt-4o">GPT-4O - Most Capable</option>
+                    <option value="gpt-4">GPT-4 - Legacy but Reliable</option>
+                </select>
+            </div>
+            
+            <!-- Status Toggle -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                    Agent Status
+                </label>
+                <div class="flex items-center gap-3">
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="edit-agent-active" name="is_active" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brand-300 dark:peer-focus:ring-brand-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-brand-600"></div>
+                        <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Active</span>
+                    </label>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                        Inactive agents won't appear in chat selection
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Tools Selection -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                    Available Tools
+                </label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="edit-tools-container">
+                    <label class="relative flex items-start p-3 border border-gray-200 rounded-lg hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800/50 cursor-pointer transition-colors">
+                        <div class="flex items-center h-5">
+                            <input type="checkbox" name="tools" value="Math" class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-700">
+                        </div>
+                        <div class="ml-3 min-w-0 flex-1">
+                            <div class="text-sm font-medium text-gray-900 dark:text-white">Math Calculator</div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400">Perform mathematical calculations safely</div>
+                        </div>
+                    </label>
+                    
+                    <label class="relative flex items-start p-3 border border-gray-200 rounded-lg hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800/50 cursor-pointer transition-colors">
+                        <div class="flex items-center h-5">
+                            <input type="checkbox" name="tools" value="Search" class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-700">
+                        </div>
+                        <div class="ml-3 min-w-0 flex-1">
+                            <div class="text-sm font-medium text-gray-900 dark:text-white">Web Search</div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400">Search for current information on the web</div>
+                        </div>
+                    </label>
+                    
+                    <label class="relative flex items-start p-3 border border-gray-200 rounded-lg hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800/50 cursor-pointer transition-colors">
+                        <div class="flex items-center h-5">
+                            <input type="checkbox" name="tools" value="Weather" class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-700">
+                        </div>
+                        <div class="ml-3 min-w-0 flex-1">
+                            <div class="text-sm font-medium text-gray-900 dark:text-white">Weather Information</div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400">Get weather information for any location</div>
+                        </div>
+                    </label>
+                    
+                    <label class="relative flex items-start p-3 border border-gray-200 rounded-lg hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800/50 cursor-pointer transition-colors">
+                        <div class="flex items-center h-5">
+                            <input type="checkbox" name="tools" value="ReadPDF" class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-700">
+                        </div>
+                        <div class="ml-3 min-w-0 flex-1">
+                            <div class="text-sm font-medium text-gray-900 dark:text-white">PDF Reader</div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400">Extract text and information from PDF files</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="flex justify-end space-x-3 pt-6 border-t border-gray-100 dark:border-gray-800">
+                <button 
+                    type="button" 
+                    onclick="closeEditModal()"
+                    class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+                >
+                    Cancel
+                </button>
+                <button 
+                    type="submit"
+                    class="inline-flex items-center justify-center rounded-lg bg-brand-500 px-6 py-2.5 text-sm font-medium text-white shadow-theme-xs hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
+                >
+                    <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const createAgentBtns = [
@@ -441,17 +597,18 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const createAgentModal = document.getElementById('create-agent-modal');
     const createAgentForm = document.getElementById('create-agent-form');
+    const editAgentModal = document.getElementById('edit-agent-modal');
+    const editAgentForm = document.getElementById('edit-agent-form');
     
     // Show create modal
     createAgentBtns.forEach(btn => {
         btn?.addEventListener('click', function() {
             createAgentModal.classList.remove('hidden');
-            // Focus first input
             document.getElementById('agent-name').focus();
         });
     });
     
-    // Handle form submission
+    // Handle create form submission
     createAgentForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         
@@ -470,7 +627,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const originalText = submitBtn.innerHTML;
         
         try {
-            // Show loading state
             submitBtn.disabled = true;
             submitBtn.innerHTML = `
                 <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
@@ -494,21 +650,67 @@ document.addEventListener('DOMContentLoaded', function() {
                 throw new Error(errorData.error || `Failed to create agent (${response.status})`);
             }
             
-            const result = await response.json();
-            
-            // Show success message
             showToast('success', `Agent "${agentData.name}" created successfully!`);
-            
-            // Reload page to show new agent
-            setTimeout(() => {
-                window.location.reload();
-            }, 1000);
+            setTimeout(() => window.location.reload(), 1000);
             
         } catch (error) {
             console.error('Error creating agent:', error);
             showToast('error', error.message || 'Failed to create agent. Please try again.');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
+    });
+    
+    // Handle edit form submission
+    editAgentForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(editAgentForm);
+        const tools = Array.from(editAgentForm.querySelectorAll('input[name="tools"]:checked'))
+                          .map(checkbox => checkbox.value);
+        
+        const agentId = document.getElementById('edit-agent-id').value;
+        const agentData = {
+            name: formData.get('name'),
+            instructions: formData.get('instructions'),
+            model: formData.get('model'),
+            is_active: document.getElementById('edit-agent-active').checked,
+            tools: tools
+        };
+        
+        const submitBtn = editAgentForm.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        
+        try {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `
+                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Saving...
+            `;
             
-            // Reset button
+            const response = await fetch(`/api/agents/${agentId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify(agentData)
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || `Failed to update agent (${response.status})`);
+            }
+            
+            showToast('success', `Agent "${agentData.name}" updated successfully!`);
+            setTimeout(() => window.location.reload(), 1000);
+            
+        } catch (error) {
+            console.error('Error updating agent:', error);
+            showToast('error', error.message || 'Failed to update agent. Please try again.');
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalText;
         }
@@ -518,32 +720,73 @@ document.addEventListener('DOMContentLoaded', function() {
 function closeCreateModal() {
     const modal = document.getElementById('create-agent-modal');
     modal.classList.add('hidden');
-    
-    // Reset form
     document.getElementById('create-agent-form').reset();
 }
 
+function closeEditModal() {
+    const modal = document.getElementById('edit-agent-modal');
+    modal.classList.add('hidden');
+    document.getElementById('edit-agent-form').reset();
+}
+
 function testAgent(agentId) {
-    // Redirect to chat with agent selection
     window.location.href = `/chat?agent=${agentId}`;
 }
 
-function editAgent(agentId) {
-    // For now, show a simple alert
-    // In a full implementation, you'd show an edit modal
-    showToast('warning', 'Edit functionality coming soon! For now, you can create a new agent or delete this one.');
+async function editAgent(agentId) {
+    try {
+        // Fetch agent data
+        const response = await fetch(`/api/agents/${agentId}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch agent data');
+        }
+        
+        const agent = await response.json();
+        
+        // Populate form fields
+        document.getElementById('edit-agent-id').value = agent.id;
+        document.getElementById('edit-agent-name').value = agent.name;
+        document.getElementById('edit-agent-instructions').value = agent.instructions;
+        document.getElementById('edit-agent-model').value = agent.model;
+        document.getElementById('edit-agent-active').checked = agent.is_active;
+        
+        // Clear all tool checkboxes first
+        document.querySelectorAll('#edit-tools-container input[name="tools"]').forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        
+        // Check the tools that this agent has
+        if (agent.tools && Array.isArray(agent.tools)) {
+            agent.tools.forEach(tool => {
+                const checkbox = document.querySelector(`#edit-tools-container input[value="${tool}"]`);
+                if (checkbox) {
+                    checkbox.checked = true;
+                }
+            });
+        }
+        
+        // Show the modal
+        document.getElementById('edit-agent-modal').classList.remove('hidden');
+        document.getElementById('edit-agent-name').focus();
+        
+    } catch (error) {
+        console.error('Error loading agent for editing:', error);
+        showToast('error', 'Failed to load agent data for editing');
+    }
 }
 
 async function deleteAgent(agentId, agentName) {
-    // Enhanced confirmation dialog
-    const confirmed = confirm(
-        `Are you sure you want to delete "${agentName}"?\n\n` +
+    const confirmed = await showConfirmDelete(
+        agentName,
         'This action cannot be undone and will permanently remove the agent and all its configurations.'
     );
     
-    if (!confirmed) {
-        return;
-    }
+    if (!confirmed) return;
     
     try {
         const response = await fetch(`/api/agents/${agentId}`, {
@@ -558,13 +801,8 @@ async function deleteAgent(agentId, agentName) {
             throw new Error(errorData.error || `Failed to delete agent (${response.status})`);
         }
         
-        // Show success message
         showToast('success', `Agent "${agentName}" deleted successfully.`);
-        
-        // Reload page to update list
-        setTimeout(() => {
-            window.location.reload();
-        }, 1000);
+        setTimeout(() => window.location.reload(), 1000);
         
     } catch (error) {
         console.error('Error deleting agent:', error);
@@ -572,33 +810,45 @@ async function deleteAgent(agentId, agentName) {
     }
 }
 
-// Close modal when clicking outside
-document.getElementById('create-agent-modal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeCreateModal();
-    }
-});
+// Close modals when clicking outside - REMOVED for agent modals
+// (We keep this behavior only for confirmation modal)
 
 // Enhanced keyboard support
 document.addEventListener('keydown', function(e) {
-    const modal = document.getElementById('create-agent-modal');
+    const createModal = document.getElementById('create-agent-modal');
+    const editModal = document.getElementById('edit-agent-modal');
     
-    // Close modal on Escape key
-    if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
-        closeCreateModal();
+    // Close modals on Escape key
+    if (e.key === 'Escape') {
+        if (!createModal.classList.contains('hidden')) {
+            closeCreateModal();
+        }
+        if (!editModal.classList.contains('hidden')) {
+            closeEditModal();
+        }
     }
     
-    // Submit form on Ctrl/Cmd + Enter
-    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && !modal.classList.contains('hidden')) {
+    // Submit forms on Ctrl/Cmd + Enter
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
         e.preventDefault();
-        document.getElementById('create-agent-form').dispatchEvent(new Event('submit'));
+        if (!createModal.classList.contains('hidden')) {
+            document.getElementById('create-agent-form').dispatchEvent(new Event('submit'));
+        }
+        if (!editModal.classList.contains('hidden')) {
+            document.getElementById('edit-agent-form').dispatchEvent(new Event('submit'));
+        }
     }
 });
 
-// Auto-resize textarea in modal
-document.getElementById('agent-instructions')?.addEventListener('input', function() {
-    this.style.height = 'auto';
-    this.style.height = Math.min(this.scrollHeight, 200) + 'px';
+// Auto-resize textareas
+['agent-instructions', 'edit-agent-instructions'].forEach(id => {
+    const textarea = document.getElementById(id);
+    if (textarea) {
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 200) + 'px';
+        });
+    }
 });
 </script>
 

@@ -1,5 +1,5 @@
 <?php
-// Updated src/Api/Models/Agent.php - Fixed delete method
+// src/Api/Models/Agent.php - Updated with enhanced edit methods
 
 require_once __DIR__ . '/../../Core/Database.php';
 require_once __DIR__ . '/../../Core/Helpers.php';
@@ -29,6 +29,16 @@ class Agent {
         return $this; // For method chaining
     }
     
+    public function clearTools() {
+        $this->tools = [];
+        return $this;
+    }
+    
+    public function setName($name) {
+        $this->name = $name;
+        return $this;
+    }
+    
     public function setInstructions($instructions) {
         $this->instructions = $instructions;
         return $this;
@@ -46,6 +56,11 @@ class Agent {
     
     public function setId($id) {
         $this->id = $id;
+        return $this;
+    }
+    
+    public function setUserId($userId) {
+        $this->userId = $userId;
         return $this;
     }
     

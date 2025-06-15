@@ -1,5 +1,5 @@
 <?php
-// src/Api/OpenAI/AgentsAPI.php  
+// src/Api/OpenAI/AgentsAPI.php - Updated with enhanced updateAgent method
 
 require_once __DIR__ . '/../../Core/Helpers.php';
 require_once __DIR__ . '/../Models/Agent.php';
@@ -96,34 +96,38 @@ class AgentsAPI {
                 Helpers::jsonError('Access denied', 403);
             }
             
-            // Create updated agent
-            $updatedAgent = new Agent(
-                $input['name'] ?? $agent->getName(),
-                $input['instructions'] ?? $agent->getInstructions(),
-                $input['model'] ?? $agent->getModel()
-            );
+            // Update agent properties
+            if (isset($input['name'])) {
+                $agent->setName($input['name']);
+            }
             
-            // Set the ID to update existing record
-            $updatedAgent->setId($agent->getId());
+            if (isset($input['instructions'])) {
+                $agent->setInstructions($input['instructions']);
+            }
             
-            // Add tools
+            if (isset($input['model'])) {
+                $agent->setModel($input['model']);
+            }
+            
+            if (isset($input['is_active'])) {
+                $agent->setActive($input['is_active']);
+            }
+            
+            // Update tools - clear existing and add new ones
             if (isset($input['tools']) && is_array($input['tools'])) {
+                $agent->clearTools();
                 foreach ($input['tools'] as $tool) {
-                    $updatedAgent->addTool($tool);
-                }
-            } else {
-                // Keep existing tools
-                foreach ($agent->getTools() as $tool) {
-                    $updatedAgent->addTool($tool);
+                    $agent->addTool($tool);
                 }
             }
             
-            $updatedAgent->save();
+            // Save the updated agent
+            $agent->save();
             
-            Helpers::jsonResponse($updatedAgent->toArray());
+            Helpers::jsonResponse($agent->toArray());
         } catch (Exception $e) {
             error_log("Error updating agent: " . $e->getMessage());
-            Helpers::jsonError('Failed to update agent', 500);
+            Helpers::jsonError('Failed to update agent: ' . $e->getMessage(), 500);
         }
     }
     
@@ -144,7 +148,7 @@ class AgentsAPI {
             
             $agent->delete();
             
-            Helpers::jsonResponse(['message' => 'Agent deleted successfully'], 204);
+            Helpers::jsonResponse(['message' => 'Agent deleted successfully'], 200);
         } catch (Exception $e) {
             error_log("Error deleting agent: " . $e->getMessage());
             Helpers::jsonError('Failed to delete agent', 500);

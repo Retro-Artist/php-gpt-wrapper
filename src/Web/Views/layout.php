@@ -332,56 +332,97 @@
         </div>
     </div>
 
-<!-- Toast Notifications Container - FIXED VERSION -->
-<div 
-    id="toast-container" 
-    class="fixed top-4 right-4 z-50 space-y-3 pointer-events-none"
-    x-data="{ toasts: [] }"
-    @show-toast.window="toasts.push({id: Date.now(), type: $event.detail.type, message: $event.detail.message}); setTimeout(() => toasts.shift(), 5000)"
->
-    <template x-for="toast in toasts" :key="toast.id">
-        <div 
-            x-show="true"
-            x-transition:enter="transition ease-out duration-300 transform"
-            x-transition:enter-start="translate-x-full opacity-0"
-            x-transition:enter-end="translate-x-0 opacity-100"
-            x-transition:leave="transition ease-in duration-200 transform"
-            x-transition:leave-start="translate-x-0 opacity-100"
-            x-transition:leave-end="translate-x-full opacity-0"
-            class="w-80 bg-white shadow-theme-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden dark:bg-gray-800"
-        >
-            <div class="p-4">
-                <div class="flex items-start">
-                    <div class="flex-shrink-0">
-                        <svg x-show="toast.type === 'success'" class="h-5 w-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <svg x-show="toast.type === 'error'" class="h-5 w-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <svg x-show="toast.type === 'warning'" class="h-5 w-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                        </svg>
-                    </div>
-                    <div class="ml-3 w-0 flex-1">
-                        <p class="text-sm font-medium text-gray-900 dark:text-white leading-5" x-text="toast.message"></p>
-                    </div>
-                    <div class="ml-4 flex-shrink-0 flex">
-                        <button 
-                            @click="toasts = toasts.filter(t => t.id !== toast.id)"
-                            class="bg-white rounded-md inline-flex text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 dark:bg-gray-800 dark:hover:text-gray-300"
-                        >
-                            <span class="sr-only">Close</span>
-                            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+    <!-- Toast Notifications Container -->
+    <div 
+        id="toast-container" 
+        class="fixed top-4 right-4 z-50 space-y-3 pointer-events-none"
+        x-data="{ toasts: [] }"
+        @show-toast.window="toasts.push({id: Date.now(), type: $event.detail.type, message: $event.detail.message}); setTimeout(() => toasts.shift(), 5000)"
+    >
+        <template x-for="toast in toasts" :key="toast.id">
+            <div 
+                x-show="true"
+                x-transition:enter="transition ease-out duration-300 transform"
+                x-transition:enter-start="translate-x-full opacity-0"
+                x-transition:enter-end="translate-x-0 opacity-100"
+                x-transition:leave="transition ease-in duration-200 transform"
+                x-transition:leave-start="translate-x-0 opacity-100"
+                x-transition:leave-end="translate-x-full opacity-0"
+                class="w-80 bg-white shadow-theme-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden dark:bg-gray-800"
+            >
+                <div class="p-4">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <svg x-show="toast.type === 'success'" class="h-5 w-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
-                        </button>
+                            <svg x-show="toast.type === 'error'" class="h-5 w-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <svg x-show="toast.type === 'warning'" class="h-5 w-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-3 w-0 flex-1">
+                            <p class="text-sm font-medium text-gray-900 dark:text-white leading-5" x-text="toast.message"></p>
+                        </div>
+                        <div class="ml-4 flex-shrink-0 flex">
+                            <button 
+                                @click="toasts = toasts.filter(t => t.id !== toast.id)"
+                                class="bg-white rounded-md inline-flex text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 dark:bg-gray-800 dark:hover:text-gray-300"
+                            >
+                                <span class="sr-only">Close</span>
+                                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
+        </template>
+    </div>
+
+    <!-- Simple Confirmation Modal -->
+    <div id="confirm-modal" class="hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-[60]">
+        <div class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 max-w-md bg-white dark:bg-gray-900 rounded-2xl shadow-theme-xl">
+            <div class="p-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                    </div>
+                    <h3 id="confirm-title" class="text-lg font-semibold text-gray-800 dark:text-white">
+                        Delete Confirmation
+                    </h3>
+                </div>
+                
+                <p id="confirm-message" class="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                    Are you sure you want to delete this item?
+                </p>
+                
+                <p id="confirm-details" class="text-xs text-gray-500 dark:text-gray-500 mb-6">
+                    This action cannot be undone.
+                </p>
+                
+                <div class="flex justify-end gap-3">
+                    <button 
+                        id="confirm-cancel"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                    >
+                        Cancel
+                    </button>
+                    <button 
+                        id="confirm-delete"
+                        class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                    >
+                        Delete
+                    </button>
+                </div>
+            </div>
         </div>
-    </template>
-</div>
+    </div>
 
     <!-- Global JavaScript utilities -->
     <script>
@@ -436,6 +477,45 @@
                 throw error;
             }
         };
+
+        // Simple confirmation modal
+        let confirmResolver = null;
+
+        window.showConfirmDelete = function(itemName, details = 'This action cannot be undone.') {
+            document.getElementById('confirm-message').textContent = `Are you sure you want to delete "${itemName}"?`;
+            document.getElementById('confirm-details').textContent = details;
+            document.getElementById('confirm-modal').classList.remove('hidden');
+            
+            return new Promise(resolve => {
+                confirmResolver = resolve;
+            });
+        };
+
+        // Event listeners
+        document.getElementById('confirm-cancel').addEventListener('click', () => {
+            document.getElementById('confirm-modal').classList.add('hidden');
+            if (confirmResolver) confirmResolver(false);
+        });
+
+        document.getElementById('confirm-delete').addEventListener('click', () => {
+            document.getElementById('confirm-modal').classList.add('hidden');
+            if (confirmResolver) confirmResolver(true);
+        });
+
+        // Close on escape or backdrop click
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !document.getElementById('confirm-modal').classList.contains('hidden')) {
+                document.getElementById('confirm-modal').classList.add('hidden');
+                if (confirmResolver) confirmResolver(false);
+            }
+        });
+
+        document.getElementById('confirm-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'confirm-modal') {
+                document.getElementById('confirm-modal').classList.add('hidden');
+                if (confirmResolver) confirmResolver(false);
+            }
+        });
     </script>
 </body>
 
