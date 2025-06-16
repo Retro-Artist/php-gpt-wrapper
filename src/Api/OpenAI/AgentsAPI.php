@@ -178,20 +178,20 @@ class AgentsAPI {
                 Helpers::jsonError('Thread access denied', 403);
             }
             
-            // Save user message first
-            Thread::addMessage($input['threadId'], 'user', $input['message']);
-            
-            // Execute agent
+            // Execute agent (this now handles adding both user and assistant messages)
             $response = $agent->execute($input['message'], $input['threadId']);
             
-            // Validate response before saving
+            // Validate response
             if ($response === null || trim($response) === '') {
                 error_log("Agent execution returned null/empty response for agent {$agentId}");
                 $response = "I apologize, but I encountered an issue processing your request. Please try again.";
+                
+                // Add fallback response to thread
+                Thread::addMessage($input['threadId'], 'assistant', $response, [
+                    'agent_id' => $agentId,
+                    'error' => 'Empty response fallback'
+                ]);
             }
-            
-            // Save agent response
-            Thread::addMessage($input['threadId'], 'assistant', $response);
             
             Helpers::jsonResponse([
                 'success' => true,
@@ -199,8 +199,25 @@ class AgentsAPI {
                 'agentId' => $agentId,
                 'threadId' => $input['threadId']
             ]);
+            
         } catch (Exception $e) {
             error_log("Error executing agent: " . $e->getMessage());
+            
+            // Try to add an error message to the thread
+            try {
+                if (isset($input['threadId'])) {
+                    Thread::addMessage($input['threadId'], 'assistant', 
+                        "I encountered an error while processing your request. Please try again.",
+                        [
+                            'agent_id' => $agentId ?? null,
+                            'error' => $e->getMessage()
+                        ]
+                    );
+                }
+            } catch (Exception $saveError) {
+                error_log("Failed to save error message: " . $saveError->getMessage());
+            }
+            
             Helpers::jsonError('Failed to execute agent: ' . $e->getMessage(), 500);
         }
     }

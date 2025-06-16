@@ -1,18 +1,25 @@
 <?php
+// src/Web/Views/chat.php - UPDATED for JSON message system
+
 $pageTitle = 'Chat - OpenAI Webchat';
-$page = 'chat'; // For sidebar active state
+$page = 'chat';
 ob_start();
+
+// Get messages from the current thread (now using JSON storage)
+$messages = !empty($currentThread) ? Thread::getMessages($currentThread['id']) : [];
 ?>
 
-<!-- Chat Page with Consistent Design -->
+<!-- Chat Page with JSON Message Support -->
 <div
     x-data="{ 
-        currentThreadId: <?= $currentThread['id'] ?>,
+        currentThreadId: <?= $currentThread['id'] ?? 'null' ?>,
         currentAgentId: <?= $selectedAgentId ? $selectedAgentId : 'null' ?>,
         isLoading: false,
-        showThreadSidebar: true
+        showThreadSidebar: true,
+        messageCount: <?= count($messages) ?>
     }"
     class="mx-auto max-w-(--breakpoint-2xl) p-4 md:p-6">
+    
     <!-- Page Header -->
     <div class="mb-6">
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -25,10 +32,10 @@ ob_start();
                     </div>
                     <div>
                         <h1 class="text-title-md font-bold text-gray-800 dark:text-white/90">
-                            <?= htmlspecialchars($currentThread['title']) ?>
+                            <?= htmlspecialchars($currentThread['title'] ?? 'New Chat') ?>
                         </h1>
                         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            AI-powered conversation with intelligent agents
+                            <span x-text="messageCount"></span> messages • AI-powered conversation
                         </p>
                     </div>
                 </div>
@@ -93,6 +100,7 @@ ob_start();
             x-transition:enter-start="opacity-0 transform -translate-x-4"
             x-transition:enter-end="opacity-100 transform translate-x-0"
             class="lg:col-span-1 space-y-6">
+            
             <!-- Recent Conversations Card -->
             <div class="rounded-2xl border border-gray-200 bg-white shadow-theme-xs dark:border-gray-800 dark:bg-white/[0.03]">
                 <div class="flex items-center justify-between px-6 py-5">
@@ -115,7 +123,7 @@ ob_start();
                         <div class="divide-y divide-gray-100 dark:divide-gray-800 max-h-96 overflow-y-auto custom-scrollbar">
                             <?php foreach ($threads as $thread): ?>
                                 <div
-                                    class="px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer transition-colors <?= $thread['id'] == $currentThread['id'] ? 'bg-brand-50 dark:bg-brand-900/20' : '' ?>"
+                                    class="px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer transition-colors <?= $thread['id'] == ($currentThread['id'] ?? 0) ? 'bg-brand-50 dark:bg-brand-900/20' : '' ?>"
                                     data-thread-id="<?= $thread['id'] ?>"
                                     onclick="switchToThread(<?= $thread['id'] ?>)">
                                     <div class="flex items-center space-x-3">
@@ -131,10 +139,13 @@ ob_start();
                                                 <?= htmlspecialchars($thread['title']) ?>
                                             </p>
                                             <p class="text-xs text-gray-500 dark:text-gray-400">
-                                                <?= $thread['message_count'] ?? 0 ?> messages • <?= date('M j', strtotime($thread['created_at'])) ?>
+                                                <?= $thread['message_count'] ?? 0 ?> messages
+                                                <?php if (isset($thread['last_message_at'])): ?>
+                                                    • <?= date('M j', strtotime($thread['last_message_at'])) ?>
+                                                <?php endif; ?>
                                             </p>
                                         </div>
-                                        <?php if ($thread['id'] == $currentThread['id']): ?>
+                                        <?php if ($thread['id'] == ($currentThread['id'] ?? 0)): ?>
                                             <div class="flex-shrink-0">
                                                 <div class="h-2 w-2 rounded-full bg-brand-500"></div>
                                             </div>
@@ -250,6 +261,18 @@ ob_start();
                         </div>
                     <?php else: ?>
                         <?php foreach ($messages as $message): ?>
+                            <?php 
+                            // Skip system messages in the UI
+                            if ($message['role'] === 'system') continue;
+                            
+                            // Get timestamp - handle both old and new format
+                            $timestamp = '';
+                            if (isset($message['timestamp'])) {
+                                $timestamp = date('g:i A', strtotime($message['timestamp']));
+                            } elseif (isset($message['created_at'])) {
+                                $timestamp = date('g:i A', strtotime($message['created_at']));
+                            }
+                            ?>
                             <div class="flex items-start gap-4 <?= $message['role'] === 'user' ? 'flex-row-reverse' : '' ?>">
                                 <!-- Avatar -->
                                 <div class="flex-shrink-0">
@@ -274,11 +297,48 @@ ob_start();
                                                 <?= nl2br(htmlspecialchars($message['content'])) ?>
                                             </p>
                                         </div>
+                                        
+                                        <!-- Message Metadata -->
+                                        <?php if (isset($message['agent_name']) || isset($message['model']) || isset($message['tools_called'])): ?>
+                                            <div class="mt-2 pt-2 border-t border-gray-100 dark:border-gray-700">
+                                                <div class="flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400">
+                                                    <?php if (isset($message['agent_name'])): ?>
+                                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-brand-100 dark:bg-brand-900/20 rounded text-brand-700 dark:text-brand-300">
+                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                                            </svg>
+                                                            <?= htmlspecialchars($message['agent_name']) ?>
+                                                        </span>
+                                                    <?php endif; ?>
+                                                    
+                                                    <?php if (isset($message['model'])): ?>
+                                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded">
+                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
+                                                            </svg>
+                                                            <?= htmlspecialchars($message['model']) ?>
+                                                        </span>
+                                                    <?php endif; ?>
+                                                    
+                                                    <?php if (isset($message['tools_called']) && !empty($message['tools_called'])): ?>
+                                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-100 dark:bg-purple-900/20 rounded text-purple-700 dark:text-purple-300">
+                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                            </svg>
+                                                            Tools: <?= is_array($message['tools_called']) ? implode(', ', $message['tools_called']) : $message['tools_called'] ?>
+                                                        </span>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                        <?php endif; ?>
                                     </div>
                                     <div class="mt-2 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 <?= $message['role'] === 'user' ? 'justify-end' : '' ?>">
                                         <span><?= $message['role'] === 'user' ? 'You' : 'Assistant' ?></span>
-                                        <span>•</span>
-                                        <span><?= date('g:i A', strtotime($message['created_at'])) ?></span>
+                                        <?php if ($timestamp): ?>
+                                            <span>•</span>
+                                            <span><?= $timestamp ?></span>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
@@ -327,7 +387,7 @@ ob_start();
         const newThreadBtn = document.getElementById('new-thread-btn');
         const agentSelect = document.getElementById('agent-select');
 
-        let currentThreadId = <?= $currentThread['id'] ?>;
+        let currentThreadId = <?= $currentThread['id'] ?? 'null' ?>;
         let currentAgentId = <?= $selectedAgentId ? $selectedAgentId : 'null' ?>;
 
         // Auto-resize textarea
@@ -424,7 +484,14 @@ ob_start();
                 hideTypingIndicator();
 
                 if (result.response) {
-                    addMessageToUI('assistant', result.response);
+                    addMessageToUI('assistant', result.response, result.token_usage);
+                    
+                    // Update message count
+                    const messageCountElement = document.querySelector('[x-text="messageCount"]');
+                    if (messageCountElement) {
+                        const currentCount = parseInt(messageCountElement.textContent) || 0;
+                        messageCountElement.textContent = currentCount + 2; // User + Assistant
+                    }
                 } else {
                     throw new Error('No response received');
                 }
@@ -445,8 +512,8 @@ ob_start();
             }
         });
 
-        // Add message to UI
-        function addMessageToUI(role, content) {
+        // Add message to UI with enhanced metadata support
+        function addMessageToUI(role, content, tokenUsage = null) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `flex items-start gap-4 ${role === 'user' ? 'flex-row-reverse' : ''}`;
 
@@ -465,29 +532,47 @@ ob_start();
                 '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>' :
                 '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>';
 
+            // Build metadata HTML if available
+            let metadataHtml = '';
+            if (role === 'assistant' && tokenUsage) {
+                metadataHtml = `
+                    <div class="mt-2 pt-2 border-t border-gray-100 dark:border-gray-700">
+                        <div class="flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400">
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                                ${tokenUsage.total_tokens || 0} tokens
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }
+
             messageDiv.innerHTML = `
-            <div class="flex-shrink-0">
-                <div class="w-10 h-10 rounded-full ${avatarClass} flex items-center justify-center shadow-theme-xs">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        ${avatarIcon}
-                    </svg>
-                </div>
-            </div>
-            <div class="flex-1 max-w-3xl">
-                <div class="rounded-2xl border border-gray-200 bg-white p-4 shadow-theme-xs dark:border-gray-800 dark:bg-gray-800 ${messageClass}">
-                    <div class="prose prose-sm max-w-none dark:prose-invert">
-                        <p class="text-gray-900 dark:text-gray-100 leading-relaxed m-0">
-                            ${content.replace(/\n/g, '<br>')}
-                        </p>
+                <div class="flex-shrink-0">
+                    <div class="w-10 h-10 rounded-full ${avatarClass} flex items-center justify-center shadow-theme-xs">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            ${avatarIcon}
+                        </svg>
                     </div>
                 </div>
-                <div class="mt-2 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 ${timeClass}">
-                    <span>${role === 'user' ? 'You' : 'Assistant'}</span>
-                    <span>•</span>
-                    <span>${timeString}</span>
+                <div class="flex-1 max-w-3xl">
+                    <div class="rounded-2xl border border-gray-200 bg-white p-4 shadow-theme-xs dark:border-gray-800 dark:bg-gray-800 ${messageClass}">
+                        <div class="prose prose-sm max-w-none dark:prose-invert">
+                            <p class="text-gray-900 dark:text-gray-100 leading-relaxed m-0">
+                                ${content.replace(/\n/g, '<br>')}
+                            </p>
+                        </div>
+                        ${metadataHtml}
+                    </div>
+                    <div class="mt-2 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 ${timeClass}">
+                        <span>${role === 'user' ? 'You' : 'Assistant'}</span>
+                        <span>•</span>
+                        <span>${timeString}</span>
+                    </div>
                 </div>
-            </div>
-        `;
+            `;
 
             messagesContainer.appendChild(messageDiv);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -504,23 +589,23 @@ ob_start();
             typingDiv.id = 'typing-indicator';
             typingDiv.className = 'flex items-start gap-4';
             typingDiv.innerHTML = `
-            <div class="flex-shrink-0">
-                <div class="w-10 h-10 rounded-full bg-gray-500 flex items-center justify-center shadow-theme-xs">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                    </svg>
-                </div>
-            </div>
-            <div class="flex-1 max-w-3xl">
-                <div class="rounded-2xl border border-gray-200 bg-white p-4 shadow-theme-xs dark:border-gray-800 dark:bg-gray-800">
-                    <div class="flex items-center space-x-1">
-                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                <div class="flex-shrink-0">
+                    <div class="w-10 h-10 rounded-full bg-gray-500 flex items-center justify-center shadow-theme-xs">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                        </svg>
                     </div>
                 </div>
-            </div>
-        `;
+                <div class="flex-1 max-w-3xl">
+                    <div class="rounded-2xl border border-gray-200 bg-white p-4 shadow-theme-xs dark:border-gray-800 dark:bg-gray-800">
+                        <div class="flex items-center space-x-1">
+                            <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                            <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                            <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
 
             messagesContainer.appendChild(typingDiv);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -603,6 +688,7 @@ ob_start();
         document.getElementById('message-input').focus();
     }
 </script>
+
 
 <?php
 $content = ob_get_clean();
