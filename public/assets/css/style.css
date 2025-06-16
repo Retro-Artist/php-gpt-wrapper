@@ -117,3 +117,31 @@ html {
 *:focus:not(:focus-visible) {
     outline: none;
 }
+
+/* Developer Mode Toggle Styles - Compact Version */
+/* Hide metadata when developer mode is off */
+.message-metadata {
+    transition: all 0.3s ease-in-out;
+}
+
+.message-metadata.hidden {
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    border-top: none !important;
+}
+
+/* Smooth transitions for the compact toggle */
+#developer-mode-toggle {
+    transition: background-color 0.2s ease-in-out;
+}
+
+#developer-mode-indicator {
+    transition: transform 0.2s ease-in-out;
+}
+
+#developer-mode-icon {
+    transition: color 0.2s ease-in-out;
+}
