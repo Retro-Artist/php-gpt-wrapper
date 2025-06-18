@@ -435,5 +435,157 @@
     <?php unset($_SESSION['error']); ?>
   <?php endif; ?>
 
+  <!-- Add this code at the end of your layout.php file, right before the closing </body> tag -->
+
+<script>
+// Global Toast Notification System
+window.showToast = function(type, message, duration = 5000) {
+    // Remove any existing toasts
+    const existingToast = document.getElementById('dynamic-toast');
+    if (existingToast) {
+        existingToast.remove();
+    }
+
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.id = 'dynamic-toast';
+    toast.className = `fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full`;
+    
+    // Set colors based on type
+    if (type === 'success') {
+        toast.className += ' bg-green-100 border border-green-400 text-green-700 dark:bg-green-900/20 dark:border-green-800 dark:text-green-400';
+    } else if (type === 'error') {
+        toast.className += ' bg-red-100 border border-red-400 text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400';
+    } else if (type === 'warning') {
+        toast.className += ' bg-yellow-100 border border-yellow-400 text-yellow-700 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-400';
+    } else {
+        toast.className += ' bg-blue-100 border border-blue-400 text-blue-700 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-400';
+    }
+
+    // Create toast content
+    toast.innerHTML = `
+        <div class="flex items-center justify-between">
+            <span class="text-sm font-medium">${message}</span>
+            <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-current hover:opacity-70">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+    `;
+
+    // Add to document
+    document.body.appendChild(toast);
+
+    // Animate in
+    setTimeout(() => {
+        toast.classList.remove('translate-x-full');
+    }, 100);
+
+    // Auto-remove after duration
+    setTimeout(() => {
+        if (toast.parentElement) {
+            toast.classList.add('translate-x-full');
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.remove();
+                }
+            }, 300);
+        }
+    }, duration);
+};
+
+// Global Confirmation Modal System
+window.showConfirmDelete = function(itemName, description = '') {
+    return new Promise((resolve) => {
+        // Remove any existing confirmation modal
+        const existingModal = document.getElementById('confirmation-modal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+
+        // Create modal HTML
+        const modalHtml = `
+            <div id="confirmation-modal" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm overflow-y-auto h-full w-full z-50">
+                <div class="relative top-20 mx-auto p-5 border-0 w-11/12 md:w-1/3 max-w-md shadow-xl rounded-xl bg-white dark:bg-gray-900">
+                    <div class="text-center">
+                        <!-- Warning Icon -->
+                        <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/20 mb-4">
+                            <svg class="h-6 w-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                            </svg>
+                        </div>
+                        
+                        <!-- Title -->
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                            Delete "${itemName}"?
+                        </h3>
+                        
+                        <!-- Description -->
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                            ${description || 'This action cannot be undone.'}
+                        </p>
+                        
+                        <!-- Buttons -->
+                        <div class="flex space-x-3 justify-center">
+                            <button id="cancel-delete" class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700">
+                                Cancel
+                            </button>
+                            <button id="confirm-delete" class="inline-flex items-center justify-center rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Add modal to document
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+        const modal = document.getElementById('confirmation-modal');
+        const cancelBtn = document.getElementById('cancel-delete');
+        const confirmBtn = document.getElementById('confirm-delete');
+
+        // Handle cancel
+        const handleCancel = () => {
+            modal.remove();
+            resolve(false);
+        };
+
+        // Handle confirm
+        const handleConfirm = () => {
+            modal.remove();
+            resolve(true);
+        };
+
+        // Add event listeners
+        cancelBtn.addEventListener('click', handleCancel);
+        confirmBtn.addEventListener('click', handleConfirm);
+
+        // Close on backdrop click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                handleCancel();
+            }
+        });
+
+        // Close on Escape key
+        const handleEscape = (e) => {
+            if (e.key === 'Escape') {
+                handleCancel();
+                document.removeEventListener('keydown', handleEscape);
+            }
+        };
+        document.addEventListener('keydown', handleEscape);
+
+        // Focus the confirm button
+        setTimeout(() => {
+            confirmBtn.focus();
+        }, 100);
+    });
+};
+</script>
+
 </body>
 </html>
