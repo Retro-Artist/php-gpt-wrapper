@@ -458,6 +458,21 @@ $messages = !empty($currentThread) ? Thread::getMessages($currentThread['id']) :
 
         // Auto-resize textarea
         if (messageInput) {
+            messageInput.addEventListener('keydown', function(e) {
+                // Check if Enter key is pressed without Shift
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault(); // Prevent default new line behavior
+
+                    // Trigger form submission only if there's content
+                    const message = messageInput.value.trim();
+                    if (message && !sendButton.disabled) {
+                        messageForm.dispatchEvent(new Event('submit'));
+                    }
+                }
+                // Allow Shift + Enter for new lines (default browser behavior)
+            });
+
+            // Auto-resize textarea (your existing code remains the same)
             messageInput.addEventListener('input', function() {
                 this.style.height = 'auto';
                 this.style.height = (this.scrollHeight) + 'px';
