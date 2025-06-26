@@ -3,7 +3,8 @@
     "description": "AI-Powered PHP Environment",
     "type": "project",
     "require": {
-        "php": "^8.4"
+        "php": "^8.4",
+        "inspector-apm/neuron-ai": "^1.14"
     },
     "autoload": {
         "psr-4": {

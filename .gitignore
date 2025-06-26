@@ -1,5 +1,8 @@
 # Composer
-/vendor/
+/vendor/*
+!/vendor/inspector-apm/
+/vendor/inspector-apm/*
+!/vendor/inspector-apm/neuron-ai/
 composer.lock
 
 # Environment files
