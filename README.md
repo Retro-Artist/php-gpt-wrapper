@@ -18,7 +18,7 @@ A clean, maintainable OpenAI-powered webchat application featuring dynamic agent
 - **Shared Foundation**: Same models, services, and business logic
 - **Different Responses**: Web returns HTML, API returns JSON
 
-## Directory Structure
+# Project Structure
 
 ```
 src/
@@ -292,7 +292,7 @@ docker-compose exec app composer install
 
 3. Run database migration:
 ```bash
-docker-compose exec app php database/migrate.php
+docker-compose exec app php app/migrate.php
 ```
 
 4. Access your development environment:
